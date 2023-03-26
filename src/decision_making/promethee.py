@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Promethee:
-    """Promethee method for multi-criteria decision-making
+    """PROMETHEE method for multi-criteria decision-making
     
     Attributes:
         matrix (np.array): Matrix with the value for each criterion for each alternative.
@@ -18,8 +18,13 @@ class Promethee:
         method (either 'I' or 'II').
     """
 
-    def __init__(self, matrix: np.ndarray, alternatives: list, criteria_types: list, weights: np.ndarray,
-                 preference_thresholds: np.ndarray, indifference_thresholds: np.ndarray):
+    def __init__(self,
+                 matrix: np.ndarray,
+                 alternatives: list[str],
+                 criteria_types: list[int],
+                 weights: np.ndarray,
+                 preference_thresholds: np.ndarray,
+                 indifference_thresholds: np.ndarray):
         """
         Initializes the promethee object.
 
@@ -37,31 +42,38 @@ class Promethee:
         self.weights = weights
         self.preference_thresholds = preference_thresholds
         self.indifference_thresholds = indifference_thresholds
-        self.n_alternatives = matrix.shape[0]
-        self.n_criteria = matrix.shape[1]
+
         self.comprehensiveness_matrix = np.zeros((self.n_alternatives, self.n_alternatives))
         self.positive_flow = np.zeros(self.n_alternatives)
         self.negative_flow = np.zeros(self.n_alternatives)
         self.net_flow = np.zeros(self.n_alternatives)
 
-        self.__calculate_comprehensiveness_matrix()
-        self.__calculate_positive_flow()
-        self.__calculate_negative_flow()
-        self.__calculate_net_flow()
+        self._calculate_comprehensiveness_matrix()
+        self._calculate_positive_flow()
+        self._calculate_negative_flow()
+        self._calculate_net_flow()
 
-    def __calculate_comprehensiveness_matrix(self):
+    @property
+    def n_alternatives(self):
+        return self.matrix.shape[0]
+
+    @property
+    def n_criteria(self):
+        return self.matrix.shape[1]
+
+    def _calculate_comprehensiveness_matrix(self):
         for i in range(self.n_alternatives):
             for j in range(self.n_alternatives):
-                self.comprehensiveness_matrix[i, j] = self.__calculate_comprehensiveness(i, j)
+                self.comprehensiveness_matrix[i, j] = self._calculate_comprehensiveness(i, j)
 
-    def __calculate_comprehensiveness(self, i, j):
+    def _calculate_comprehensiveness(self, i, j):
         if i == j:
             return 0
         else:
-            return sum(self.__calculate_comprehensiveness_criterion(i, j, k) / sum(self.weights) for k in
+            return sum(self._calculate_comprehensiveness_criterion(i, j, k) / sum(self.weights) for k in
                        range(self.n_criteria))
 
-    def __calculate_comprehensiveness_criterion(self, i, j, k):
+    def _calculate_comprehensiveness_criterion(self, i, j, k):
         """Calculates the comprehensiveness for a given criterion.
         First, it calculates the difference between the value of the criterion for the alternatives i and j, keeping in
         mind that the criterion can be either a benefit or a cost, (that is why we multiply by the criteria type, to
@@ -80,24 +92,24 @@ class Promethee:
             return self.weights[k] * (diff - self.indifference_thresholds[k]) / (
                     self.preference_thresholds[k] - self.indifference_thresholds[k])
 
-    def __calculate_positive_flow(self):
+    def _calculate_positive_flow(self):
         self.positive_flow = np.sum(self.comprehensiveness_matrix, axis=1)
 
-    def __calculate_negative_flow(self):
+    def _calculate_negative_flow(self):
         self.negative_flow = np.sum(self.comprehensiveness_matrix, axis=0)
 
-    def __calculate_net_flow(self):
+    def _calculate_net_flow(self):
         self.net_flow = self.positive_flow - self.negative_flow
 
     def rank(self, method: str):
         if method == 'I':
-            return self.__rank_method_I()
+            return self._rank_method_i()
         elif method == 'II':
-            return self.__rank_method_II()
+            return self._rank_method_ii()
         else:
             raise ValueError('Invalid method, must be either "I" or "II"')
 
-    def __rank_method_I(self):
+    def _rank_method_i(self):
         """Ranks the alternatives based on their positive and negative flows.
         a > b:
         - if a has a higher positive flow than b and a has a lower negative flow than b
@@ -114,7 +126,7 @@ class Promethee:
         # return self.alternatives[np.lexsort((self.negative_flow, self.positive_flow))[::-1]]
         pass
 
-    def __rank_method_II(self):
+    def _rank_method_ii(self):
         return self.alternatives[np.argsort(self.net_flow)[::-1]]
 
 
