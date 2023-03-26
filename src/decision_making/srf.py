@@ -31,7 +31,7 @@ class Srf:
         """Deletes the white card alternatives from the rank dictionary and ensures that each rank has a list of
         alternatives."""
 
-        for rank in self.rank_dict:
+        for rank in self.rank_dict.copy():
             if self.rank_dict[rank] == 'white_card':
                 del self.rank_dict[rank]
             elif not isinstance(self.rank_dict[rank], list):
