@@ -1,2 +1,2 @@
-from .critera import Criteria
+from .criterion import Criterion
 from .promethee import Promethee

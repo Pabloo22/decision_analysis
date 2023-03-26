@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.decision_making import Criteria
+from src.decision_making import Criterion
 
 
 class Promethee:
@@ -14,7 +14,7 @@ class Promethee:
     Example:
         >>> matrix = np.array([[10, 18, 10], [15, 0, 20]])
         >>> alternatives = ['A', 'B']
-        >>> criteria = [Criteria(3, 1, 0, 10), Criteria(5, 1, 20, 10), Criteria(2, 1, 5, 2)]
+        >>> criteria = [Criterion(3, 1, 0, 10), Criterion(5, 1, 20, 10), Criterion(2, 1, 5, 2)]
         >>> promethee = Promethee(matrix, criteria, alternatives)
         >>> promethee.run()
         >>> print(promethee.comprehensiveness_matrix)
@@ -24,7 +24,7 @@ class Promethee:
 
     def __init__(self,
                  matrix: np.ndarray,
-                 criteria: list[Criteria],
+                 criteria: list[Criterion],
                  alternatives: list[str] = None,
                  ):
         self.matrix = matrix
