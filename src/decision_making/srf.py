@@ -23,23 +23,23 @@ def srf(rank_dict: dict[int, Union[str, list[str]]], ratio: int) -> dict[str, fl
     {'g1': 0.021, 'g2': 0.172, 'g3': 0.172, 'g4': 0.21, 'g5': 0.097, 'g6': 0.078, 'g7': 0.172, 'g8': 0.078}
     """
     def preprocess_rank_dict(rank_dict_: dict[int, Union[str, list[str]]]) -> dict[int, list[str]]:
-        for rank_ in rank_dict_.copy():
-            if rank_dict_[rank_] == 'white_card':
+        for rank_, value in rank_dict_.copy().items():
+            if value == 'white_card':
                 del rank_dict_[rank_]
-            elif not isinstance(rank_dict_[rank_], list):
-                rank_dict_[rank_] = [rank_dict_[rank_]]
+            elif not isinstance(value, list):
+                rank_dict_[rank_] = [value]
         return rank_dict_
 
     def calculate_weight(rank_, r_v_, ratio_):
         return 1 + (ratio_ - 1) * (rank_ - 1) / (r_v_ - 1)
 
     rank_dict = preprocess_rank_dict(rank_dict)
-    r_v = max(rank_dict.keys())
+    max_rank = max(rank_dict.keys())
     weights = dict()
 
     for rank in rank_dict.keys():
         for alternative in rank_dict[rank]:
-            weights[alternative] = calculate_weight(rank, r_v, ratio)
+            weights[alternative] = calculate_weight(rank, max_rank, ratio)
 
     sum_weights = sum(weights.values())
     for alternative in weights.keys():
