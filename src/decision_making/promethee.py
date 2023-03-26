@@ -1,48 +1,42 @@
 import numpy as np
 
+from src.decision_making import Criteria
+
 
 class Promethee:
-    """PROMETHEE method for multi-criteria decision-making
-    
-    Attributes:
+    """PROMETHEE method for multi-criteria decision-making.
+
+    Args:
         matrix (np.array): Matrix with the value for each criterion for each alternative.
         alternatives (list): List with the alternatives names.
-        criteria_types (list): If the criterion is benefit or cost (1 or -1).
-        weights (np.array): Array with the weight for each criterion.
-        preference_thresholds (np.array): Array containing the preference thresholds
-        indifference_thresholds (np.array): Array containing the indifference thresholds
+        criteria (list): List with the criteria.
 
-        
-    Methods:
-        rank(method): Ranks the alternatives based on their concordance and discordance indices, using the specified 
-        method (either 'I' or 'II').
+    Example:
+        >>> matrix = np.array([[10, 18, 10], [15, 0, 20]])
+        >>> alternatives = ['A', 'B']
+        >>> criteria = [Criteria(3, 1, 0, 10), Criteria(5, 1, 20, 10), Criteria(2, 1, 5, 2)]
+        >>> promethee = Promethee(matrix, criteria, alternatives)
+        >>> promethee.run()
+        >>> print(promethee.comprehensiveness_matrix)
+        [[0.  0.4]
+         [0.2 0. ]]
     """
 
     def __init__(self,
                  matrix: np.ndarray,
-                 alternatives: list[str],
-                 criteria_types: list[int],
-                 weights: np.ndarray,
-                 preference_thresholds: np.ndarray,
-                 indifference_thresholds: np.ndarray):
-        """
-        Initializes the promethee object.
-
-        Args:
-            matrix (np.array): Matrix with the value for each criterion for each alternative.
-            alternatives (list): List with the alternatives names.
-            criteria_types (list): If the criterion is benefit or cost (1 or -1).
-            weights (np.array): Array with the weight for each criterion.
-            preference_thresholds (np.array): Array containing the preference thresholds
-            indifference_thresholds (np.array): Array containing the indifference thresholds
-        """
+                 criteria: list[Criteria],
+                 alternatives: list[str] = None,
+                 ):
         self.matrix = matrix
         self.alternatives = alternatives
-        self.criteria_types = criteria_types
-        self.weights = weights
-        self.preference_thresholds = preference_thresholds
-        self.indifference_thresholds = indifference_thresholds
+        self.criteria = criteria
 
+        self.comprehensiveness_matrix = None
+        self.positive_flow = None
+        self.negative_flow = None
+        self.net_flow = None
+
+    def run(self):
         self.comprehensiveness_matrix = np.zeros((self.n_alternatives, self.n_alternatives))
         self.positive_flow = np.zeros(self.n_alternatives)
         self.negative_flow = np.zeros(self.n_alternatives)
@@ -70,11 +64,12 @@ class Promethee:
         if i == j:
             return 0
         else:
-            return sum(self._calculate_comprehensiveness_criterion(i, j, k) / sum(self.weights) for k in
-                       range(self.n_criteria))
+            return sum(self._calculate_comprehensiveness_criterion(i, j, k) / sum(c.weight for c in self.criteria)
+                       for k in range(self.n_criteria))
 
     def _calculate_comprehensiveness_criterion(self, i, j, k):
         """Calculates the comprehensiveness for a given criterion.
+
         First, it calculates the difference between the value of the criterion for the alternatives i and j, keeping in
         mind that the criterion can be either a benefit or a cost, (that is why we multiply by the criteria type, to
         invert the sign if it is a cost). Then, it checks if the difference is smaller than the indifference threshold,
@@ -82,15 +77,15 @@ class Promethee:
         the criterion. Otherwise, it interpolates between the indifference and preference thresholds, and returns the
         comprehensiveness value.
         """
-        print(i, j, k)
-        diff = self.criteria_types[k] * (self.matrix[i, k] - self.matrix[j, k])
-        if diff < self.indifference_thresholds[k]:
+        criterion = self.criteria[k]
+        diff = criterion.criteria_type * (self.matrix[i, k] - self.matrix[j, k])
+        if diff < criterion.indifference_threshold:
             return 0
-        elif diff > self.preference_thresholds[k]:
-            return self.weights[k]
+        elif diff > criterion.preference_threshold:
+            return criterion.weight
         else:
-            return self.weights[k] * (diff - self.indifference_thresholds[k]) / (
-                    self.preference_thresholds[k] - self.indifference_thresholds[k])
+            return criterion.weight * (diff - criterion.indifference_threshold) / (
+                    criterion.preference_threshold - criterion.indifference_threshold)
 
     def _calculate_positive_flow(self):
         self.positive_flow = np.sum(self.comprehensiveness_matrix, axis=1)
@@ -131,11 +126,6 @@ class Promethee:
 
 
 if __name__ == "__main__":
-    matrix = np.array([[10, 18, 10], [15, 0, 20]])
-    alternatives = ['A', 'B']
-    criteria_types = [1, 1, 1]
-    weights = np.array([3, 5, 2])
-    preference_thresholds = np.array([0, 20, 5])
-    indifference_thresholds = np.array([10, 10, 2])
-    promethee = Promethee(matrix, alternatives, criteria_types, weights, preference_thresholds, indifference_thresholds)
-    print(promethee.comprehensiveness_matrix)
+    import doctest
+
+    doctest.testmod()
