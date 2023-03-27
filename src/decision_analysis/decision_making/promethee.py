@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.decision_making import Criterion
+from src.decision_analysis.decision_making import Criterion
 
 
 class Promethee:
