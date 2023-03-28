@@ -11,6 +11,7 @@ class Criterion:
         name (str): Name of the criterion. Optional.
         preference_threshold (float): Preference threshold for the criterion. Optional.
         indifference_threshold (float): Indifference threshold for the criterion. Optional.
+        veto_threshold (float): Veto threshold for the criterion. Optional.
 
     """
     criteria_type: int
@@ -18,3 +19,4 @@ class Criterion:
     name: str = ""
     preference_threshold: Optional[float] = None
     indifference_threshold: Optional[float] = None
+    veto_threshold: Optional[float] = None
