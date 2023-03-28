@@ -5,7 +5,7 @@ def _preprocess_rank_dict(ranking: dict[int, Union[str, list[str]]]) -> dict[int
     """Deletes the white card alternatives from the rank dictionary and ensures that each rank has a list of
     alternatives."""
     for rank_, value in ranking.copy().items():
-        if value == 'white_card':
+        if value == 'white_card' or not value:
             del ranking[rank_]
         elif not isinstance(value, list):
             ranking[rank_] = [value]

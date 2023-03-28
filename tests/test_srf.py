@@ -1,6 +1,9 @@
 import pytest
+import collections
+import random
+
 from decision_analysis.decision_making import srf
-from src.decision_analysis.decision_making.srf import _preprocess_rank_dict, _calculate_weight
+from src.decision_analysis.decision_making.srf import _preprocess_rank_dict
 
 
 def test_preprocess_rank_dict():
@@ -25,6 +28,66 @@ def test_preprocess_rank_dict():
         11: ['g4']
     }
     assert _preprocess_rank_dict(ranking) == expected
+
+    ranking2 = {
+        1: 'g1',
+        2: 'white_card',
+        3: 'white_card',
+        4: 'g6',
+        5: 'g5',
+        6: 'white_card',
+        7: 'white_card',
+        8: 'white_card',
+        9: 'g2',
+        10: 'white_card',
+    }
+    expected2 = {
+        1: ['g1'],
+        4: ['g6'],
+        5: ['g5'],
+        9: ['g2']
+    }
+    assert _preprocess_rank_dict(ranking2) == expected2
+
+    ranking3 = {
+        1: 'g1',
+        2: [],
+        3: 'white_card',
+        4: 'g6',
+        5: 'g5',
+        6: 'white_card',
+        7: 'white_card',
+        8: 'white_card',
+        9: 'g2',
+        10: 'white_card',
+    }
+    expected3 = {
+        1: ['g1'],
+        4: ['g6'],
+        5: ['g5'],
+        9: ['g2']
+    }
+    assert _preprocess_rank_dict(ranking3) == expected3
+
+    ranking4 = {
+        1: 'g1',
+        2: [],
+        3: 'white_card',
+        4: 'g6',
+        5: 'g5',
+        6: 'white_card',
+        7: 'white_card',
+        8: 'white_card',
+        9: ['g2'],
+        10: 'white_card',
+    }
+    expected4 = {
+        1: ['g1'],
+        4: ['g6'],
+        5: ['g5'],
+        9: ['g2']
+    }
+    assert _preprocess_rank_dict(ranking4) == expected4
 
 
 def test_srf():
