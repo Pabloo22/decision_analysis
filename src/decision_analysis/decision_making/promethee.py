@@ -1,7 +1,11 @@
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from src.decision_analysis.decision_making import Criterion
+
+sns.set()
 
 
 class Promethee:
@@ -155,6 +159,30 @@ class Promethee:
 
         nx.draw(g, with_labels=True, node_size=1000, node_color="lightblue", font_size=16, font_weight="bold",
                 edgecolors="black", linewidths=2, alpha=0.9, width=2, font_color="black", arrowsize=20, arrowstyle="->")
+
+    @staticmethod
+    def plot_criterion(criterion: Criterion):
+        """Plots the criterion function.
+
+        Args:
+            criterion: The criterion to plot.
+        """
+        no_support = np.linspace(0, criterion.indifference_threshold, 100)
+        partial_support = np.linspace(criterion.indifference_threshold, criterion.preference_threshold, 100)
+        full_support = np.linspace(criterion.preference_threshold, criterion.preference_threshold + 10, 100)
+
+        no_support_y = np.zeros(len(no_support))
+        partial_support_y = criterion.weight * (partial_support - criterion.indifference_threshold) / (
+                criterion.preference_threshold - criterion.indifference_threshold)
+        full_support_y = np.ones(len(full_support)) * criterion.weight
+
+        plt.plot(no_support, no_support_y, label='No support', color='red')
+        plt.plot(partial_support, partial_support_y, label='Partial support', color='orange')
+        plt.plot(full_support, full_support_y, label='Full support', color='green')
+        plt.legend()
+        plt.ylabel('$w_i\cdot\pi_i(a,b)$')
+        plt.xlabel('$d_{i}(a,b)$' if criterion.criteria_type == 1 else '$d_{i}(b,a)$')
+        plt.show()
 
 
 if __name__ == "__main__":
