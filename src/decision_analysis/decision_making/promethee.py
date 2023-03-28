@@ -14,7 +14,9 @@ class Promethee:
     Example:
         >>> matrix = np.array([[10, 18, 10], [15, 0, 20]])
         >>> alternatives = ['A', 'B']
-        >>> criteria = [Criterion(3, 1, 0, 10), Criterion(5, 1, 20, 10), Criterion(2, 1, 5, 2)]
+        >>> criteria = [Criterion(weight=3, criteria_type=1, preference_threshold=0, indifference_threshold=10),
+        ...             Criterion(weight=5, criteria_type=1, preference_threshold=20, indifference_threshold=10),
+        ...             Criterion(weight=2, criteria_type=1, preference_threshold=5, indifference_threshold=2)]
         >>> promethee = Promethee(matrix, criteria, alternatives)
         >>> promethee.run()
         >>> print(promethee.comprehensiveness_matrix)
@@ -25,8 +27,7 @@ class Promethee:
     def __init__(self,
                  matrix: np.ndarray,
                  criteria: list[Criterion],
-                 alternatives: list[str] = None,
-                 ):
+                 alternatives: list[str] = None):
         self.matrix = matrix
         self.alternatives = alternatives
         self.criteria = criteria

@@ -5,7 +5,7 @@ from typing import Optional
 @dataclass
 class Criterion:
     """
-    Args:
+    Attributes:
         criteria_type (int): If the criterion is benefit or cost (1 or -1).
         weight (float): Weight of the criterion. Optional, default 1.
         name (str): Name of the criterion. Optional.
