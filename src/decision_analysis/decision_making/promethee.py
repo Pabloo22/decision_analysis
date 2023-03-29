@@ -33,8 +33,8 @@ class Promethee:
                  matrix_of_alternative_values: np.ndarray,
                  criteria: list[Criterion],
                  alternatives_names: list[str] = None):
-        self.matrix = matrix_of_alternative_values
-        self.alternatives = alternatives_names
+        self.matrix_of_alternatives_values = matrix_of_alternative_values
+        self.alternative_names = alternatives_names
         self.criteria = criteria
 
         self.comprehensiveness_matrix = None
@@ -55,11 +55,11 @@ class Promethee:
 
     @property
     def n_alternatives(self):
-        return self.matrix.shape[0]
+        return self.matrix_of_alternatives_values.shape[0]
 
     @property
     def n_criteria(self):
-        return self.matrix.shape[1]
+        return self.matrix_of_alternatives_values.shape[1]
 
     def _calculate_comprehensiveness_matrix(self):
         for i in range(self.n_alternatives):
@@ -84,7 +84,7 @@ class Promethee:
         comprehensiveness value.
         """
         criterion = self.criteria[k]
-        diff = criterion.criteria_type * (self.matrix[i, k] - self.matrix[j, k])
+        diff = criterion.criteria_type * (self.matrix_of_alternatives_values[i, k] - self.matrix_of_alternatives_values[j, k])
         if diff < criterion.indifference_threshold:
             return 0
         elif diff > criterion.preference_threshold:
@@ -127,13 +127,13 @@ class Promethee:
         # return self.alternatives[np.lexsort((self.negative_flow, self.positive_flow))[::-1]]
 
         positive_argsort = np.argsort(-self.positive_flow)
-        positive_order = self.alternatives[positive_argsort]
+        positive_order = self.alternative_names[positive_argsort]
         negative_argsort = np.argsort(self.negative_flow)
-        negative_order = self.alternatives[negative_argsort]
+        negative_order = self.alternative_names[negative_argsort]
 
         g = nx.DiGraph()
 
-        g.add_nodes_from(self.alternatives)
+        g.add_nodes_from(self.alternative_names)
 
         for i in range(1, self.n_alternatives - 1):
             if positive_order[i] == negative_order[i]:
@@ -150,7 +150,7 @@ class Promethee:
                 edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
 
     def _rank_method_ii(self):
-        order = self.alternatives[np.argsort(-self.net_flow)]
+        order = self.alternative_names[np.argsort(-self.net_flow)]
 
         g = nx.DiGraph()
         g.add_nodes_from(order)
