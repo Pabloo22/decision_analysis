@@ -33,8 +33,7 @@ def srf(ranking: dict[int, Union[str, list[str]]], ratio: int) -> dict[str, floa
                         6: 'white_card', 7: 'white_card', 8: 'white_card', 9: ['g2', 'g3', 'g7'], \
                         10: 'white_card', 11: 'g4'}
     >>> weights_dict = srf(ranking_dict, 10)
-    >>> sorted_weights = {key: round(weights_dict[key], 3) for key in sorted(weights_dict, key=weights_dict.get, \
-                          reverse=True)}
+    >>> sorted_weights = {key: round(weights_dict[key], 3) for key in sorted(weights_dict)}
     >>> sorted_weights
     {'g1': 0.021, 'g2': 0.172, 'g3': 0.172, 'g4': 0.21, 'g5': 0.097, 'g6': 0.078, 'g7': 0.172, 'g8': 0.078}
     """
