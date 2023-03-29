@@ -10,7 +10,7 @@ class ElectreTriB:
 
     Attributes:
         criteria (List[Criterion]): List of criteria to be considered.
-        profiles (List[Alternative]): List of profiles representing class boundaries.
+        boundaries (List[Alternative]): List of profiles representing class boundaries.
         cutting_level (float): Credibility threshold for validating outranking. Optional, default 0.5.
     """
 
@@ -21,13 +21,23 @@ class ElectreTriB:
                  cutting_level: float = 0.5):
         self.criteria = criteria
         self.alternatives = alternatives
-        self.profiles = profiles
+        self.boundaries = profiles
         self.cutting_level = cutting_level
 
-        self.concordance_matrix = None
-        self.discordance_matrix = None
-        self.outranking_matrix = None
+        self.weights = np.array([c.weight for c in self.criteria])
+        self.sum_weights = np.sum(self.weights)
+        self.weights = self.weights / self.sum_weights
+
+        self.marginal_concordance_tensor_alt_bound = None
+        self.marginal_concordance_tensor_bound_alt = None
+
+        self.marginal_discordance_tensor_alt_bound = None
+        self.marginal_discordance_tensor_bound_alt = None
+
+        self.comprehensive_concordance_matrix = None
+
         self.outranking_credibility_matrix = None
+        self.outranking_matrix = None
         self.relation_matrix = None
 
     @property
@@ -35,44 +45,82 @@ class ElectreTriB:
         return len(self.alternatives)
 
     @property
-    def n_profiles(self):
-        return len(self.profiles)
+    def n_boundaries(self):
+        return len(self.boundaries)
+
+    @property
+    def n_criteria(self):
+        return len(self.criteria)
 
     def run(self):
         """Runs the ELECTRE TRI-B method."""
-        self.concordance_matrix = np.zeros((self.n_alternatives, self.n_profiles))
-        self.discordance_matrix = np.zeros((self.n_alternatives, self.n_profiles))
-        self.outranking_matrix = np.zeros((self.n_alternatives, self.n_profiles))
-        self.outranking_credibility_matrix = np.zeros((self.n_alternatives, self.n_profiles))
-        self.relation_matrix = np.zeros((self.n_alternatives, self.n_alternatives))
 
-        self._calculate_concordance_matrix()
-        self._calculate_discordance_matrix()
-        self._calculate_outranking_matrix()
+        self.marginal_concordance_tensor_alt_bound = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
+        self.marginal_concordance_tensor_bound_alt = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
+
+        self.marginal_discordance_tensor_alt_bound = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
+        self.marginal_discordance_tensor_bound_alt = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
+
+        self.comprehensive_concordance_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
+        self.outranking_credibility_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
+
+        self.outranking_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
+        self.relation_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
+
+        self._calculate_marginal_concordance_tensors()
+        self._calculate_marginal_discordance_tensors()
+
+        self._calculate_comprehensive_concordance_matrix()
+
         self._calculate_outranking_credibility_matrix()
+        self._calculate_outranking_matrix()
         self._calculate_relation_matrix()
 
-    def _calculate_concordance_matrix(self):
-        """Calculates the concordance matrix."""
+    def _calculate_marginal_concordance_tensors(self):
+        """Calculates the concordance matrices."""
         for i, alternative in enumerate(self.alternatives):
-            for j, profile in enumerate(self.profiles):
-                self.concordance_matrix[i, j] = self.compute_concordance(alternative, profile)
+            for j, bound in enumerate(self.boundaries):
+                for k, criterion in enumerate(self.criteria):
+                    self.marginal_concordance_tensor_alt_bound[i, j, k] = \
+                        self.calculate_marginal_concordance(alternative, bound, criterion)
 
-    def _calculate_discordance_matrix(self):
+                    self.marginal_concordance_tensor_bound_alt[i, j, k] = \
+                        self.calculate_marginal_concordance(bound, alternative, criterion)
+
+    def _calculate_marginal_discordance_tensors(self):
         """Calculates the discordance matrix."""
         for i, alternative in enumerate(self.alternatives):
-            for j, profile in enumerate(self.profiles):
-                for criterion in self.criteria:
-                    self.discordance_matrix[i, j] += self.compute_discordance(alternative, profile, criterion)
+            for j, bound in enumerate(self.boundaries):
+                for k, criterion in enumerate(self.criteria):
+                    self.marginal_discordance_tensor_alt_bound[i, j, k] = \
+                        self.calculate_marginal_discordance(alternative, bound, criterion)
 
+                    self.marginal_discordance_tensor_bound_alt[i, j, k] = \
+                        self.calculate_marginal_discordance(bound, alternative, criterion)
+
+    def _calculate_comprehensive_concordance_matrix(self):
+        """Calculates the comprehensive concordance matrix."""
+        for i in range(self.n_alternatives):
+            for j in range(self.n_boundaries):
+                self.comprehensive_concordance_matrix[i, j] = np.sum(
+                    self.weights * self.marginal_concordance_tensor_alt_bound[i, j, :])
     def _calculate_outranking_matrix(self):
         """Calculates the outranking matrix."""
         for i in range(self.n_alternatives):
-            for j in range(self.n_profiles):
-                self.outranking_matrix[i, j] = self.concordance_matrix[i, j] - self.discordance_matrix[i, j]
+            for j in range(self.n_boundaries):
+                self.outranking_matrix[i, j] = self.comprehensive_concordance_matrix[i, j] - self.discordance_matrix[i, j]
 
-    @staticmethod
-    def calculate_marginal_concordance(a: Alternative, b: Alternative, criterion: Criterion):
+    def calculate_marginal_concordance(self,
+                                       a: Alternative,
+                                       b: Alternative,
+                                       criterion: Criterion) -> float:
+        """Calculates the marginal concordance between one alternative and one profile boundary.
+        
+        Args:
+            a (Alternative): Alternative to compare or profile boundary.
+            b (Alternative): Alternative to compare or profile boundary.
+            criterion (Criterion): Criterion to compare.
+        """
         a_value = a.get_evaluation(criterion.name)
         b_value = b.get_evaluation(criterion.name)
 

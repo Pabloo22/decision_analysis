@@ -36,7 +36,7 @@ def test_calculate_marginal_concordance():
     electre = _electre_exercise_1()
     a, e = electre.alternatives
     g1, g2 = electre.criteria
-    bt = electre.profiles[0]
+    bt = electre.boundaries[0]
 
     assert electre.calculate_marginal_concordance(a, bt, g1) == 1
     assert electre.calculate_marginal_concordance(a, bt, g2) == 0
@@ -52,7 +52,7 @@ def test_calculate_marginal_discordance():
     electre = _electre_exercise_1()
     a, e = electre.alternatives
     g1, g2 = electre.criteria
-    bt = electre.profiles[0]
+    bt = electre.boundaries[0]
 
     assert electre.calculate_marginal_discordance(a, bt, g1) == 0
     assert electre.calculate_marginal_discordance(a, bt, g2) == 1
