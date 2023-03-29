@@ -55,11 +55,19 @@ class ElectreTriB:
     def run(self):
         """Runs the ELECTRE TRI-B method."""
 
-        self.marginal_concordance_tensor_alt_bound = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
-        self.marginal_concordance_tensor_bound_alt = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
+        self.marginal_concordance_tensor_alt_bound = np.zeros((self.n_alternatives,
+                                                               self.n_boundaries,
+                                                               self.n_criteria))
+        self.marginal_concordance_tensor_bound_alt = np.zeros((self.n_alternatives,
+                                                               self.n_boundaries,
+                                                               self.n_criteria))
 
-        self.marginal_discordance_tensor_alt_bound = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
-        self.marginal_discordance_tensor_bound_alt = np.zeros((self.n_alternatives, self.n_boundaries, self.n_criteria))
+        self.marginal_discordance_tensor_alt_bound = np.zeros((self.n_alternatives,
+                                                               self.n_boundaries,
+                                                               self.n_criteria))
+        self.marginal_discordance_tensor_bound_alt = np.zeros((self.n_alternatives,
+                                                               self.n_boundaries,
+                                                               self.n_criteria))
 
         self.comprehensive_concordance_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
         self.outranking_credibility_matrix = np.zeros((self.n_alternatives, self.n_boundaries))

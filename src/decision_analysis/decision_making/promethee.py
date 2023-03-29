@@ -12,8 +12,8 @@ class Promethee:
     """PROMETHEE method for multi-criteria decision-making.
 
     Args:
-        matrix (np.array): Matrix with the value for each criterion for each alternative.
-        alternatives (list): List with the alternatives names.
+        matrix_of_alternative_values (np.array): Matrix with the value for each criterion for each alternative.
+        alternatives_names (list): List with the alternatives names.
         criteria (list): List with the criteria.
 
     Example:
@@ -30,11 +30,11 @@ class Promethee:
     """
 
     def __init__(self,
-                 matrix: np.ndarray,
+                 matrix_of_alternative_values: np.ndarray,
                  criteria: list[Criterion],
-                 alternatives: list[str] = None):
-        self.matrix = matrix
-        self.alternatives = alternatives
+                 alternatives_names: list[str] = None):
+        self.matrix = matrix_of_alternative_values
+        self.alternatives = alternatives_names
         self.criteria = criteria
 
         self.comprehensiveness_matrix = None
