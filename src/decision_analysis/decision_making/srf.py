@@ -30,8 +30,8 @@ def srf(ranking: dict[int, Union[str, list[str]]], ratio: int) -> dict[str, floa
 
     Example:
     >>> ranking_dict = {1: 'g1', 2: 'white_card', 3: 'white_card', 4: ['g6', 'g8'], 5: 'g5', \
-                     6: 'white_card', 7: 'white_card', 8: 'white_card', 9: ['g2', 'g3', 'g7'], \
-                     10: 'white_card', 11: 'g4'}
+                        6: 'white_card', 7: 'white_card', 8: 'white_card', 9: ['g2', 'g3', 'g7'], \
+                        10: 'white_card', 11: 'g4'}
     >>> weights_dict = srf(ranking_dict, 10)
     >>> sorted_weights = {key: round(weights_dict[key], 3) for key in sorted(weights_dict)}
     >>> sorted_weights
@@ -53,7 +53,7 @@ def srf(ranking: dict[int, Union[str, list[str]]], ratio: int) -> dict[str, floa
     return weights
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import doctest
 
     doctest.testmod()

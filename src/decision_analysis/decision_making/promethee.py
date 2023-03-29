@@ -146,8 +146,8 @@ class Promethee:
                 g.add_edge(positive_order[i], positive_order[i + 1])
                 g.add_edge(negative_order[i], negative_order[i + 1])
 
-        nx.draw(g, with_labels=True, node_size=1000, node_color="lightblue", font_size=16, font_weight="bold",
-                edgecolors="black", linewidths=2, alpha=0.9, width=2, font_color="black", arrowsize=20, arrowstyle="->")
+        nx.draw(g, with_labels=True, node_size=1000, node_color='lightblue', font_size=16, font_weight='bold',
+                edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
 
     def _rank_method_ii(self):
         order = self.alternatives[np.argsort(-self.net_flow)]
@@ -157,8 +157,8 @@ class Promethee:
 
         g.add_edges_from(([(order[i], order[i + 1]) for i in range(len(order) - 1)]))
 
-        nx.draw(g, with_labels=True, node_size=1000, node_color="lightblue", font_size=16, font_weight="bold",
-                edgecolors="black", linewidths=2, alpha=0.9, width=2, font_color="black", arrowsize=20, arrowstyle="->")
+        nx.draw(g, with_labels=True, node_size=1000, node_color='lightblue', font_size=16, font_weight='bold',
+                edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
 
     @staticmethod
     def plot_criterion(criterion: Criterion):
@@ -185,7 +185,7 @@ class Promethee:
         plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import doctest
 
     doctest.testmod()
