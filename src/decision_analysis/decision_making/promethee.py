@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -124,32 +125,38 @@ class Promethee:
         a = b:
         - if a and b have the same positive flow and a and b have the same negative flow
         """
-        # return self.alternatives[np.lexsort((self.negative_flow, self.positive_flow))[::-1]]
-
-        positive_argsort = np.argsort(-self.positive_flow)
-        positive_order = self.alternative_names[positive_argsort]
-        negative_argsort = np.argsort(self.negative_flow)
-        negative_order = self.alternative_names[negative_argsort]
 
         g = nx.DiGraph()
 
         g.add_nodes_from(self.alternative_names)
 
-        for i in range(1, self.n_alternatives - 1):
-            if positive_order[i] == negative_order[i]:
-                g.add_edge(positive_order[i], positive_order[i + 1])
-            elif positive_order[i] == negative_order[i + 1]:
-                g.add_edge(positive_order[i], negative_order[i])
-            elif positive_order[i + 1] == negative_order[i]:
-                g.add_edge(negative_order[i], positive_order[i + 1])
-            else:
-                g.add_edge(positive_order[i], positive_order[i + 1])
-                g.add_edge(negative_order[i], negative_order[i + 1])
+        ranking_matrix = np.zeros((len(self.alternative_names), len(self.alternative_names)))
+
+        # First, we calculate the outranking relations (we only need to check the outranking relations)
+        for i in range(len(self.alternative_names)):
+            for j in range(len(self.alternative_names)):
+                if i != j:
+                    if self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j] or \
+                            self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] == self.negative_flow[j] or \
+                            self.positive_flow[i] == self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j]:
+                        ranking_matrix[i, j] = 1  # Outranking
+
+        # We create a dataframe to make it easier to create the edges
+        ranking_df = pd.DataFrame(ranking_matrix, columns=self.alternative_names, index=self.alternative_names)
+
+        # We add the edges to the graph
+        g.add_edges_from(ranking_df[ranking_df == 1].stack().index.tolist())
+
+        # We remove the transitive edges
+        g = nx.transitive_reduction(g)
 
         nx.draw(g, with_labels=True, node_size=1000, node_color='lightblue', font_size=16, font_weight='bold',
                 edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
 
     def _rank_method_ii(self):
+        """Ranks the alternatives based on their net flow.
+        """
+
         order = self.alternative_names[np.argsort(-self.net_flow)]
 
         g = nx.DiGraph()
