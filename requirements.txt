@@ -1,1 +1,6 @@
-numpy==1.24.2
+numpy~=1.23.5
+matplotlib~=3.6.3
+networkx~=3.0
+seaborn~=0.12.2
+pytest~=7.2.2
+setuptools~=67.6.0

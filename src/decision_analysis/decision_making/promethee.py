@@ -5,7 +5,7 @@ import seaborn as sns
 
 from src.decision_analysis.decision_making import Criterion
 
-sns.set()
+sns.set(style="white")
 
 
 class Promethee:
