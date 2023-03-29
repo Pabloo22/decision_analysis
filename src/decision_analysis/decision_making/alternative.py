@@ -40,7 +40,7 @@ class Alternative:
         Returns:
             float: The evaluation of the alternative on the specified criterion.
         """
-        return self.evaluations.get(criterion_name, 0.0)
+        return self.evaluations[criterion_name]
 
     @staticmethod
     def dataframe_to_alternatives(df: pd.DataFrame) -> list[Alternative]:
