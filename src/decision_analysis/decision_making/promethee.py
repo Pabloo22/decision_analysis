@@ -14,7 +14,7 @@ class Promethee:
 
     Args:
         matrix_of_alternative_values (np.array): Matrix with the value for each criterion for each alternative.
-        alternatives_names (list): List with the alternatives names.
+        alternative_names (list): List with the alternatives names.
         criteria (list): List with the criteria.
 
     Example:
@@ -188,7 +188,7 @@ class Promethee:
 
     def get_positive_ranking_graph(self):
         positive_argsort = np.argsort(-self.positive_flow)
-        positive_order = self.alternatives_names[positive_argsort]
+        positive_order = self.alternative_names[positive_argsort]
         g = nx.DiGraph()
         g.add_nodes_from(positive_order)
         g.add_edges_from(([(positive_order[i], positive_order[i + 1]) for i in range(len(positive_order) - 1)]))
@@ -197,7 +197,7 @@ class Promethee:
 
     def get_negative_ranking_graph(self):
         negative_argsort = np.argsort(self.negative_flow)
-        negative_order = self.alternatives_names[negative_argsort]
+        negative_order = self.alternative_names[negative_argsort]
         g = nx.DiGraph()
         g.add_nodes_from(negative_order)
         g.add_edges_from(([(negative_order[i], negative_order[i + 1]) for i in range(len(negative_order) - 1)]))
