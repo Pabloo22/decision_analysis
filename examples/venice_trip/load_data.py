@@ -20,10 +20,30 @@ def load_dataset() -> pd.DataFrame:
 
 def load_criteria() -> list[Criterion]:
     criteria = [
-        Criterion(type=-1, weight=0.357, name='Price', indifference_threshold=20, preference_threshold=200),
-        Criterion(type=1, weight=0.214, name='Commodity', indifference_threshold=0, preference_threshold=3),
-        Criterion(type=-1, weight=0.357, name='Location', indifference_threshold=0, preference_threshold=2),
-        Criterion(type=1, weight=0.071, name='Rating', indifference_threshold=1, preference_threshold=5)
+        Criterion(type=-1,
+                  weight=0.357,
+                  name='Price',
+                  indifference_threshold=20,
+                  preference_threshold=200,
+                  veto_threshold=300),
+        Criterion(type=1,
+                  weight=0.214,
+                  name='Commodity',
+                  indifference_threshold=0,
+                  preference_threshold=2,
+                  veto_threshold=3),
+        Criterion(type=-1,
+                  weight=0.357,
+                  name='Location',
+                  indifference_threshold=0,
+                  preference_threshold=1,
+                  veto_threshold=2),
+        Criterion(type=1,
+                  weight=0.071,
+                  name='Rating',
+                  indifference_threshold=1,
+                  preference_threshold=5,
+                  veto_threshold=7)
     ]
 
     return criteria
