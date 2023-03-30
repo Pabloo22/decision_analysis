@@ -187,7 +187,7 @@ class Promethee:
         plt.plot(partial_support, partial_support_y, label='Partial support', color='orange')
         plt.plot(full_support, full_support_y, label='Full support', color='green')
         plt.legend()
-        plt.ylabel('$w_i\cdot\pi_i(a,b)$')
+        plt.ylabel(r'$w_i\cdot\pi_i(a,b)$')
         plt.xlabel('$d_{i}(a,b)$' if criterion.criteria_type == 1 else '$d_{i}(b,a)$')
         plt.show()
 

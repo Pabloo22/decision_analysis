@@ -28,7 +28,7 @@ def _electre_exercise_1():
     bt = Alternative({"g1": 150, "g2": 15})
 
     # Instantiate ElectreTriB object
-    electre = ElectreTriB(criteria, [a, e], profiles=[bt], credibility_threshold=0.6)
+    electre = ElectreTriB(criteria, [a, e], boundaries=[bt], credibility_threshold=0.6)
 
     return electre
 
