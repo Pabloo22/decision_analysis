@@ -90,7 +90,7 @@ class Promethee:
         """
         criterion = self.criteria[k]
         diff = criterion.criteria_type * (
-                    self.matrix_of_alternatives_values[i, k] - self.matrix_of_alternatives_values[j, k])
+                self.matrix_of_alternatives_values[i, k] - self.matrix_of_alternatives_values[j, k])
         if diff < criterion.indifference_threshold:
             return 0
         elif diff > criterion.preference_threshold:
@@ -157,7 +157,7 @@ class Promethee:
         self.g_i.add_edges_from(ranking_df[ranking_df == 1].stack().index.tolist())
 
         # We remove the transitive edges
-        self.g_i = nx.transitive_reduction(g_i)
+        self.g_i = nx.transitive_reduction(self.g_i)
 
     def _rank_method_ii(self):
         """Ranks the alternatives based on their net flow.
