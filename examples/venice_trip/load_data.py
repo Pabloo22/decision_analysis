@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.decision_analysis.decision_making import Criterion, Alternative
+from decision_analysis.decision_making import Criterion, Alternative
 
 
 def load_dataset() -> pd.DataFrame:

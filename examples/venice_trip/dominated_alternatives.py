@@ -1,7 +1,7 @@
 import collections
 
 from load_data import load_dataset, load_criteria
-from src.decision_analysis.decision_making import find_dominated_alternatives
+from decision_analysis.decision_making import find_dominated_alternatives
 
 
 def print_dominated_alternatives():

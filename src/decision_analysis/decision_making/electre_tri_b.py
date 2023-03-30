@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import functools
 
 
-from src.decision_analysis.decision_making import Criterion, Alternative
+from decision_analysis.decision_making import Criterion, Alternative
 
 
 class ElectreTriB:

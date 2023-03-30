@@ -4,7 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from src.decision_analysis.decision_making import Criterion
+from decision_analysis.decision_making import Criterion
 
 sns.set(style="white")
 

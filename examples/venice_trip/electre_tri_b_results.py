@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.decision_analysis.decision_making import ElectreTriB
+from decision_analysis.decision_making import ElectreTriB
 
 from load_data import load_dataset, load_criteria, load_profile_boundaries, Alternative
 
