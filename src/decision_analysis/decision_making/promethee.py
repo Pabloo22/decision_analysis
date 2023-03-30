@@ -89,7 +89,7 @@ class Promethee:
         comprehensiveness value.
         """
         criterion = self.criteria[k]
-        diff = criterion.criteria_type * (
+        diff = criterion.type * (
                 self.matrix_of_alternatives_values[i, k] - self.matrix_of_alternatives_values[j, k])
         if diff < criterion.indifference_threshold:
             return 0
