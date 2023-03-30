@@ -186,6 +186,23 @@ class Promethee:
         else:
             raise ValueError('Invalid method, must be either "I" or "II"')
 
+    def get_positive_ranking_graph(self):
+        positive_argsort = np.argsort(-self.positive_flow)
+        positive_order = self.alternatives_names[positive_argsort]
+        g = nx.DiGraph()
+        g.add_nodes_from(positive_order)
+        g.add_edges_from(([(positive_order[i], positive_order[i + 1]) for i in range(len(positive_order) - 1)]))
+        return g
+
+
+    def get_negative_ranking_graph(self):
+        negative_argsort = np.argsort(self.negative_flow)
+        negative_order = self.alternatives_names[negative_argsort]
+        g = nx.DiGraph()
+        g.add_nodes_from(negative_order)
+        g.add_edges_from(([(negative_order[i], negative_order[i + 1]) for i in range(len(negative_order) - 1)]))
+        return g
+
     @staticmethod
     def plot_criterion(criterion: Criterion):
         """Plots the criterion function.
