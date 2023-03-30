@@ -135,11 +135,13 @@ class Promethee:
         # First, we calculate the outranking relations (we only need to check the outranking relations)
         for i in range(len(self.alternative_names)):
             for j in range(len(self.alternative_names)):
-                if i != j:
-                    if self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j] or \
-                            self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] == self.negative_flow[j] or \
-                            self.positive_flow[i] == self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j]:
-                        ranking_matrix[i, j] = 1  # Outranking
+                if i == j:
+                    continue
+
+                if self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j] or \
+                   self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] == self.negative_flow[j] or \
+                   self.positive_flow[i] == self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j]:
+                    ranking_matrix[i, j] = 1  # Outranking
 
         # We create a dataframe to make it easier to create the edges
         ranking_df = pd.DataFrame(ranking_matrix, columns=self.alternative_names, index=self.alternative_names)
