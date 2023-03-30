@@ -37,7 +37,6 @@ def promethee_results(version: int = 1):
     draw_graph(negative_flow, f'P-v_{version}.png')
 
 
-
 if __name__ == '__main__':
     promethee_results(1)
     promethee_results(2)
