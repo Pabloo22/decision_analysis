@@ -14,8 +14,8 @@ class Promethee:
 
     Args:
         matrix_of_alternative_values (np.array): Matrix with the value for each criterion for each alternative.
-        alternative_names (list): List with the alternatives names.
         criteria (list): List with the criteria.
+        alternatives_names (list): List with the alternatives names.
 
     Example:
         >>> matrix = np.array([[10, 18, 10], [15, 0, 20]])
@@ -144,10 +144,10 @@ class Promethee:
                     continue
 
                 if self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j] or \
-                        self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] == self.negative_flow[
-                    j] or \
-                        self.positive_flow[i] == self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[
-                    j]:
+                        self.positive_flow[i] > self.positive_flow[j] \
+                        and self.negative_flow[i] == self.negative_flow[j] or \
+                        self.positive_flow[i] == self.positive_flow[j] \
+                        and self.negative_flow[i] < self.negative_flow[j]:
                     ranking_matrix[i, j] = 1  # Outranking
 
         # We create a dataframe to make it easier to create the edges
