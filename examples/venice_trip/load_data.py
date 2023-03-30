@@ -1,5 +1,7 @@
 import pandas as pd
 
+from src.decision_analysis.decision_making import Criterion
+
 
 def load_dataset() -> pd.DataFrame:
     data = {
@@ -14,3 +16,14 @@ def load_dataset() -> pd.DataFrame:
     df = pd.DataFrame(data, index=alternatives)
 
     return df
+
+
+def load_criteria() -> list[Criterion]:
+    criteria = [
+        Criterion(name='Price (€)', type=-1),
+        Criterion(name='Commodity', type=1),
+        Criterion(name='Location', type=-1),
+        Criterion(name='Rating', type=1)
+    ]
+
+    return criteria

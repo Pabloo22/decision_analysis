@@ -20,9 +20,9 @@ class Promethee:
     Example:
         >>> matrix = np.array([[10, 18, 10], [15, 0, 20]])
         >>> alternatives = ['A', 'B']
-        >>> criteria = [Criterion(weight=3, criteria_type=1, preference_threshold=0, indifference_threshold=10),
-        ...             Criterion(weight=5, criteria_type=1, preference_threshold=20, indifference_threshold=10),
-        ...             Criterion(weight=2, criteria_type=1, preference_threshold=5, indifference_threshold=2)]
+        >>> criteria = [Criterion(weight=3, type=1, preference_threshold=0, indifference_threshold=10),
+        ...             Criterion(weight=5, type=1, preference_threshold=20, indifference_threshold=10),
+        ...             Criterion(weight=2, type=1, preference_threshold=5, indifference_threshold=2)]
         >>> promethee = Promethee(matrix, criteria, alternatives)
         >>> promethee.run()
         >>> print(promethee.comprehensiveness_matrix)
@@ -212,7 +212,7 @@ class Promethee:
         plt.plot(full_support, full_support_y, label='Full support', color='green')
         plt.legend()
         plt.ylabel(r'$w_i\cdot\pi_i(a,b)$')
-        plt.xlabel('$d_{i}(a,b)$' if criterion.criteria_type == 1 else '$d_{i}(b,a)$')
+        plt.xlabel('$d_{i}(a,b)$' if criterion.type == 1 else '$d_{i}(b,a)$')
         plt.show()
 
 

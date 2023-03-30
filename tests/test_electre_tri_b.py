@@ -6,13 +6,13 @@ from src.decision_analysis.decision_making import Criterion, Alternative, Electr
 
 def _electre_exercise_1():
     # Instantiate Criterion objects
-    g1 = Criterion(criteria_type=1,
+    g1 = Criterion(type=1,
                    weight=2,
                    preference_threshold=50,
                    indifference_threshold=10,
                    veto_threshold=100,
                    name='g1')
-    g2 = Criterion(criteria_type=-1,
+    g2 = Criterion(type=-1,
                    weight=3,
                    preference_threshold=10,
                    indifference_threshold=0,

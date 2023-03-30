@@ -1,3 +1,4 @@
+import enum
 from dataclasses import dataclass
 from typing import Optional
 
@@ -7,14 +8,14 @@ class Criterion:
     """A class representing a criterion in the decision analysis.
 
     Attributes:
-        criteria_type (int): If the criterion is benefit or cost (1 or -1).
+        type (int): If the criterion is benefit or cost (1 or -1).
         weight (float): Weight of the criterion. Optional, default 1.
         name (str): Name of the criterion. Optional.
         preference_threshold (float): Preference threshold for the criterion. Optional.
         indifference_threshold (float): Indifference threshold for the criterion. Optional.
         veto_threshold (float): Veto threshold for the criterion. Optional.
     """
-    criteria_type: int
+    type: int
     weight: float = 1.
     name: Optional[str] = None
     preference_threshold: Optional[float] = None
@@ -33,3 +34,7 @@ class Criterion:
     def _update_default_name() -> None:
         """Updates the default name of the criterion."""
         Criterion._default_name = f'g{int(Criterion._default_name[1:]) + 1}'
+
+    def reset_default_name(self) -> None:
+        """Resets the default name of the criterion."""
+        self._default_name = 'g1'
