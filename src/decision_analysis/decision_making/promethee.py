@@ -42,6 +42,8 @@ class Promethee:
         self.positive_flow = None
         self.negative_flow = None
         self.net_flow = None
+        self.g_i = None
+        self.g_ii = None
 
     def run(self):
         self.comprehensiveness_matrix = np.zeros((self.n_alternatives, self.n_alternatives))
@@ -53,6 +55,8 @@ class Promethee:
         self._calculate_positive_flow()
         self._calculate_negative_flow()
         self._calculate_net_flow()
+        self._rank_method_i()
+        self._rank_method_ii()
 
     @property
     def n_alternatives(self):
@@ -85,7 +89,8 @@ class Promethee:
         comprehensiveness value.
         """
         criterion = self.criteria[k]
-        diff = criterion.criteria_type * (self.matrix_of_alternatives_values[i, k] - self.matrix_of_alternatives_values[j, k])
+        diff = criterion.criteria_type * (
+                    self.matrix_of_alternatives_values[i, k] - self.matrix_of_alternatives_values[j, k])
         if diff < criterion.indifference_threshold:
             return 0
         elif diff > criterion.preference_threshold:
@@ -126,9 +131,9 @@ class Promethee:
         - if a and b have the same positive flow and a and b have the same negative flow
         """
 
-        g = nx.DiGraph()
+        self.g_i = nx.DiGraph()
 
-        g.add_nodes_from(self.alternative_names)
+        self.g_i.add_nodes_from(self.alternative_names)
 
         ranking_matrix = np.zeros((len(self.alternative_names), len(self.alternative_names)))
 
@@ -139,21 +144,20 @@ class Promethee:
                     continue
 
                 if self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j] or \
-                   self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] == self.negative_flow[j] or \
-                   self.positive_flow[i] == self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[j]:
+                        self.positive_flow[i] > self.positive_flow[j] and self.negative_flow[i] == self.negative_flow[
+                    j] or \
+                        self.positive_flow[i] == self.positive_flow[j] and self.negative_flow[i] < self.negative_flow[
+                    j]:
                     ranking_matrix[i, j] = 1  # Outranking
 
         # We create a dataframe to make it easier to create the edges
         ranking_df = pd.DataFrame(ranking_matrix, columns=self.alternative_names, index=self.alternative_names)
 
         # We add the edges to the graph
-        g.add_edges_from(ranking_df[ranking_df == 1].stack().index.tolist())
+        self.g_i.add_edges_from(ranking_df[ranking_df == 1].stack().index.tolist())
 
         # We remove the transitive edges
-        g = nx.transitive_reduction(g)
-
-        nx.draw(g, with_labels=True, node_size=1000, node_color='lightblue', font_size=16, font_weight='bold',
-                edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
+        self.g_i = nx.transitive_reduction(g_i)
 
     def _rank_method_ii(self):
         """Ranks the alternatives based on their net flow.
@@ -161,13 +165,31 @@ class Promethee:
 
         order = self.alternative_names[np.argsort(-self.net_flow)]
 
-        g = nx.DiGraph()
-        g.add_nodes_from(order)
+        self.g_ii = nx.DiGraph()
+        self.g_ii.add_nodes_from(order)
 
-        g.add_edges_from(([(order[i], order[i + 1]) for i in range(len(order) - 1)]))
+        self.g_ii.add_edges_from(([(order[i], order[i + 1]) for i in range(len(order) - 1)]))
+
+    def plot_ranking(self, method: str):
+        if method == 'I':
+            g = self.g_i
+        elif method == 'II':
+            g = self.g_ii
+        else:
+            raise ValueError('Invalid method, must be either "I" or "II"')
 
         nx.draw(g, with_labels=True, node_size=1000, node_color='lightblue', font_size=16, font_weight='bold',
                 edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
+
+    def get_dict_of_lists(self, method: str):
+        if method == 'I':
+            g = self.g_i
+        elif method == 'II':
+            g = self.g_ii
+        else:
+            raise ValueError('Invalid method, must be either "I" or "II"')
+
+        return nx.to_dict_of_lists(g)
 
     @staticmethod
     def plot_criterion(criterion: Criterion):
