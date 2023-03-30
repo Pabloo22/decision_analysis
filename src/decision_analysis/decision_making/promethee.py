@@ -170,26 +170,21 @@ class Promethee:
 
         self.g_ii.add_edges_from(([(order[i], order[i + 1]) for i in range(len(order) - 1)]))
 
-    def plot_ranking(self, method: str):
+    def get_ranking_graph(self, method: str):
         if method == 'I':
-            g = self.g_i
+            return self.g_i
         elif method == 'II':
-            g = self.g_ii
+            return self.g_ii
         else:
             raise ValueError('Invalid method, must be either "I" or "II"')
-
-        nx.draw(g, with_labels=True, node_size=1000, node_color='lightblue', font_size=16, font_weight='bold',
-                edgecolors='black', linewidths=2, alpha=0.9, width=2, font_color='black', arrowsize=20, arrowstyle='->')
 
     def get_dict_of_lists(self, method: str):
         if method == 'I':
-            g = self.g_i
+            return nx.to_dict_of_lists(self.g_i)
         elif method == 'II':
-            g = self.g_ii
+            return nx.to_dict_of_lists(self.g_ii)
         else:
             raise ValueError('Invalid method, must be either "I" or "II"')
-
-        return nx.to_dict_of_lists(g)
 
     @staticmethod
     def plot_criterion(criterion: Criterion):
