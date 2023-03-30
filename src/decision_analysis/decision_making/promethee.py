@@ -194,7 +194,6 @@ class Promethee:
         g.add_edges_from(([(positive_order[i], positive_order[i + 1]) for i in range(len(positive_order) - 1)]))
         return g
 
-
     def get_negative_ranking_graph(self):
         negative_argsort = np.argsort(self.negative_flow)
         negative_order = self.alternative_names[negative_argsort]
