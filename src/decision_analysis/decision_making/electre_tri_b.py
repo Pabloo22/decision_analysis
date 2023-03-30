@@ -11,7 +11,8 @@ class ElectreTriB:
 
     Attributes:
         criteria (List[Criterion]): List of criteria to be considered.
-        boundaries (List[Alternative]): List of profiles representing class boundaries.
+        boundaries (List[Alternative]): List of profiles representing class boundaries. They must be sorted in
+            ascending order.
         credibility_threshold (float): Credibility threshold for validating outranking. Optional, default 0.5.
     """
 
@@ -44,7 +45,6 @@ class ElectreTriB:
         self.outranking_credibility_matrix_bound_alt = None
 
         self.outranking_matrix = None
-        self.relation_matrix = None
 
         self.optimistic_classes = None
         self.pessimistic_classes = None
@@ -85,7 +85,6 @@ class ElectreTriB:
         self.outranking_credibility_matrix_bound_alt = np.zeros((self.n_alternatives, self.n_boundaries))
 
         self.outranking_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
-        self.relation_matrix = np.zeros((self.n_alternatives, self.n_boundaries))
 
         self.optimistic_classes = np.zeros((self.n_alternatives,), dtype=int)
         self.pessimistic_classes = np.zeros((self.n_alternatives,), dtype=int)
@@ -215,7 +214,8 @@ class ElectreTriB:
         n_alternatives = outranking_credibility_matrix_alt_bound.shape[0]
         optimistic_class_assignment = np.zeros(n_alternatives, dtype=int)
         for i, a in enumerate(outranking_credibility_matrix_alt_bound):
-            optimistic_class_assignment[i] = n_alternatives
+            n_boundaries = len(a)
+            optimistic_class_assignment[i] = n_boundaries
             for h, relation in enumerate(a):
                 if relation == 0:  # relations = {-1: '?', 0: '<', 1: '>', 0.5: '='}
                     optimistic_class_assignment[i] = h
