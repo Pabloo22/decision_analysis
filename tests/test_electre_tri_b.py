@@ -142,7 +142,7 @@ def test_calculate_class_assignments():
          [1, 1, 0.5, 0, 0],
          [1, 1, 0, 0, 0],
          [1, -1, -1, 0, 0],
-         [1, 1, 0.5, 0.5, 0]]
+         [1, 1, 0.5, 0.5, 0]],
     )
 
     optimistic_class_assignments, pessimistic_class_assignments = \

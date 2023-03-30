@@ -107,9 +107,9 @@ def load_criteria(version: int = 1) -> list[Criterion]:
 
 
 def load_profile_boundaries():
-    b1 = Alternative({'Price': 360, 'Commodity': 4, 'Location': 1, 'Rating': 8}, name='b1')
+    b3 = Alternative({'Price': 360, 'Commodity': 4, 'Location': 1, 'Rating': 8}, name='b3')
     b2 = Alternative({'Price': 430, 'Commodity': 3, 'Location': 2, 'Rating': 7}, name='b2')
-    b3 = Alternative({'Price': 500, 'Commodity': 2, 'Location': 3, 'Rating': 5}, name='b3')
+    b1 = Alternative({'Price': 500, 'Commodity': 2, 'Location': 3, 'Rating': 5}, name='b1')
 
     boundaries = [b1, b2, b3]
     return boundaries
