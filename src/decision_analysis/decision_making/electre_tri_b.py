@@ -237,7 +237,7 @@ class ElectreTriB:
         n_boundaries = outranking_credibility_matrix_alt_bound.shape[1]
         pessimistic_class_assignment = np.zeros(n_alternatives, dtype=int)
         for i, a in enumerate(outranking_credibility_matrix_alt_bound):
-            pessimistic_class_assignment[i] = 1
+            pessimistic_class_assignment[i] = 0
             for h, relation in enumerate(reversed(a)):
                 a_is_at_least_as_good_as_b = relation >= 0.5
                 if a_is_at_least_as_good_as_b:  # relations = {-1: '?', 0: '<', 1: '>', 0.5: '='}

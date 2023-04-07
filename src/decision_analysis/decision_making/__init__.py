@@ -4,3 +4,4 @@ from .promethee import Promethee
 from .srf import srf
 from .electre_tri_b import ElectreTriB
 from .utils import find_dominated_alternatives
+from .preferential_information import Comparison, Preference, Indifference
