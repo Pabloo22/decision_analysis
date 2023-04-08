@@ -13,6 +13,9 @@ class Criterion:
         preference_threshold (float): Preference threshold for the criterion. Optional.
         indifference_threshold (float): Indifference threshold for the criterion. Optional.
         veto_threshold (float): Veto threshold for the criterion. Optional.
+        value_function_characteristic_points_location (list[float]): Location of the characteristic points of the value
+            function in percentage with respect to the minimum and maximum values of the data for that criterion.
+            Optional.
     """
     type: int
     weight: float = 1.
@@ -20,6 +23,7 @@ class Criterion:
     preference_threshold: Optional[float] = None
     indifference_threshold: Optional[float] = None
     veto_threshold: Optional[float] = None
+    value_function_characteristic_points_location: Optional[list[float]] = None
 
     _default_name = 'g1'
 

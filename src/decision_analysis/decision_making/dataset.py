@@ -1,6 +1,6 @@
 import numpy as np
 
-from typing import Optional
+from typing import Optional, Union
 
 from src.decision_analysis.decision_making import Criterion
 
@@ -36,10 +36,18 @@ class Dataset:
         self.preference_relations = []
         self.indifference_relations = []
 
-    def add_preference(self, alternative_1: int, alternative_2: int):
+    def add_preference(self, alternative_1: Union[int, str], alternative_2: Union[int, str]):
+        if isinstance(alternative_1, str):
+            alternative_1 = self.alternative_names.index(alternative_1)
+        if isinstance(alternative_2, str):
+            alternative_2 = self.alternative_names.index(alternative_2)
         self.preference_relations.append((alternative_1, alternative_2))
 
-    def add_indifference(self, alternative_1: int, alternative_2: int):
+    def add_indifference(self, alternative_1: Union[int, str], alternative_2: Union[int, str]):
+        if isinstance(alternative_1, str):
+            alternative_1 = self.alternative_names.index(alternative_1)
+        if isinstance(alternative_2, str):
+            alternative_2 = self.alternative_names.index(alternative_2)
         self.indifference_relations.append((alternative_1, alternative_2))
 
 
