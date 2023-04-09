@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from typing import Optional, Union, Sequence
+from typing import Optional, Union
 
 
 class Ranking:
@@ -25,9 +25,16 @@ class Ranking:
             alternatives are indifferent and 0 if the alternative j is preferred to the alternative i
     """
 
-    def __init__(self, alternatives: Union[int, list[str]], matrix: Optional[np.ndarray] = None):
+    def __init__(self, matrix: Optional[np.ndarray] = None, alternatives: Optional[Union[int, list[str]]] = None):
+        if alternatives is None and matrix is None:
+            raise ValueError('Either the number of alternatives or the matrix must be given')
+
+        if alternatives is None:
+            alternatives = matrix.shape[0]
+
         if isinstance(alternatives, int):
             alternatives = [f'a_{i}' for i in range(1, alternatives + 1)]
+
         self.alternative_names = alternatives
         self.matrix = np.zeros((self.n_alternatives, self.n_alternatives)) if matrix is None else matrix
 
@@ -35,7 +42,8 @@ class Ranking:
     def n_alternatives(self) -> int:
         return len(self.alternative_names)
 
-    def create_matrix_from_ranking_dict(self, ranking: dict[str, int]):
+    @staticmethod
+    def from_dict(ranking: dict[str, int]) -> 'Ranking':
         """Create a matrix from a list of preference relations.
 
         Args:
@@ -48,14 +56,18 @@ class Ranking:
                 value in the cell (i, j) is 1 if the alternative i is preferred to the alternative j, 0.5 if the
                 alternatives are indifferent and 0 if the alternative j is preferred to the alternative i
         """
-        matrix = np.zeros((self.n_alternatives, self.n_alternatives))
-        for i in range(self.n_alternatives):
-            for j in range(self.n_alternatives):
-                if ranking[self.alternative_names[i]] < ranking[self.alternative_names[j]]:
+        n_alternatives = len(ranking)
+        alternative_names = list(ranking.keys())
+        matrix = np.zeros((n_alternatives, n_alternatives))
+        for i in range(n_alternatives):
+            for j in range(n_alternatives):
+                if i == j:
+                    continue
+                if ranking[alternative_names[i]] < ranking[alternative_names[j]]:
                     matrix[i, j] = 1
-                elif ranking[self.alternative_names[i]] == ranking[self.alternative_names[j]]:
+                elif ranking[alternative_names[i]] == ranking[alternative_names[j]]:
                     matrix[i, j] = 0.5
-        return matrix
+        return Ranking(matrix, alternative_names)
 
     def get_preference_relations(self) -> list[tuple[str, str]]:
         """List with the preference relations in the ranking."""
@@ -155,3 +167,10 @@ class Ranking:
             float: The Kendall tau.
         """
         return 1 - 4 * self.kendall_distance(other) / (self.n_alternatives * (self.n_alternatives - 1))
+
+
+if __name__ == "__main__":
+    ranking_dict = {'a_1': 1, 'a_2': 2, 'a_3': 3, 'a_4': 4}
+    ranking = Ranking(4)
+    ranking.from_dict(ranking_dict)
+    print(ranking.matrix)
