@@ -1,9 +1,4 @@
-from .base.criterion import Criterion
-from .base.alternative import Alternative
-from .base.dataset import Dataset
-from .base.ranking import Ranking
-from .base.value_function import ValueFunction
-
+from .base import Alternative, ValueFunction, Ranking, Criterion, Dataset
 from .promethee import Promethee
 from .srf import srf
 from .electre_tri_b import ElectreTriB

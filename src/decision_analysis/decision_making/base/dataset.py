@@ -2,7 +2,7 @@ import numpy as np
 
 from typing import Optional, Union
 
-from src.decision_analysis.decision_making import Criterion
+from .criterion import Criterion
 
 
 class Dataset:
