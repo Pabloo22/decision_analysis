@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from typing import Optional, Union
+from typing import Optional, Union, Sequence
 
 
 class Ranking:
@@ -34,6 +34,28 @@ class Ranking:
     @property
     def n_alternatives(self) -> int:
         return len(self.alternative_names)
+
+    def create_matrix_from_ranking_dict(self, ranking: dict[str, int]):
+        """Create a matrix from a list of preference relations.
+
+        Args:
+            ranking (dict): A dictionary with the position of each alternative in the ranking. The keys are the
+                alternatives names and the values are the position in the ranking. The alternatives with the
+                highest position are the most preferred alternatives.
+
+        Returns:
+            np.array: Matrix representing the ranking. The rows and columns are the alternatives and the
+                value in the cell (i, j) is 1 if the alternative i is preferred to the alternative j, 0.5 if the
+                alternatives are indifferent and 0 if the alternative j is preferred to the alternative i
+        """
+        matrix = np.zeros((self.n_alternatives, self.n_alternatives))
+        for i in range(self.n_alternatives):
+            for j in range(self.n_alternatives):
+                if ranking[self.alternative_names[i]] < ranking[self.alternative_names[j]]:
+                    matrix[i, j] = 1
+                elif ranking[self.alternative_names[i]] == ranking[self.alternative_names[j]]:
+                    matrix[i, j] = 0.5
+        return matrix
 
     def get_preference_relations(self) -> list[tuple[str, str]]:
         """List with the preference relations in the ranking."""
