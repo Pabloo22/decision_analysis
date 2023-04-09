@@ -54,5 +54,16 @@ def test_value_function_call_error():
         vf(2.5)
 
 
+@pytest.mark.parametrize("characteristic_points_values, expected", [
+    ([1, 2, 3, 4, 5], True),
+    ([5, 4, 3, 2, 1], True),
+    ([3, 3, 3, 3, 3], True),
+    ([1, 2, 3, 2, 1], False),
+    ([1, 2, 3, 3, 4], True),
+])
+def test_is_monotonic(characteristic_points_values, expected):
+    assert ValueFunction.is_monotonic(characteristic_points_values) == expected
+
+
 if __name__ == "__main__":
     pytest.main()

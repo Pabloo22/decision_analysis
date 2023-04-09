@@ -51,9 +51,9 @@ class ValueFunction:
 
         ascending = characteristic_points_values[0] < characteristic_points_values[1]
         for i in range(1, len(characteristic_points_values) - 1):
-            if ascending and characteristic_points_values[i] >= characteristic_points_values[i + 1]:
+            if ascending and characteristic_points_values[i] > characteristic_points_values[i + 1]:
                 return False
-            if not ascending and characteristic_points_values[i] <= characteristic_points_values[i + 1]:
+            if not ascending and characteristic_points_values[i] < characteristic_points_values[i + 1]:
                 return False
 
         return True
