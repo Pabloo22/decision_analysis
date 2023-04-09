@@ -33,11 +33,12 @@ class UTA:
         self.max_values = np.array(
             [max(self.data[:, i]) if self.criteria_types[i] == 1 else min(self.data[:, i]) for i in
              range(self.n_criteria)])
-        self.value_function_characteristic_points_locations = [criterion.value_function_characteristic_points_location
+        self.value_function_characteristic_points_locations = [criterion.value_function_break_points_location
                                                                for criterion in self.criteria]
         self.splices_list = [
-            [self.min_values[i]] + list((np.array(self.value_function_characteristic_points_locations) - self.min_values[i])
-                                    / (self.max_values[i] - self.min_values[i])) +
+            [self.min_values[i]] + list(
+                (np.array(self.value_function_characteristic_points_locations) - self.min_values[i])
+                / (self.max_values[i] - self.min_values[i])) +
             [self.max_values[i]] for i in range(self.n_criteria)]
 
         # POSIBLES MEJORAS:
@@ -110,24 +111,17 @@ class UTA:
 
     def _add_constraints(self):
         for alt1, alt2 in self.preference_relations:
-            self._model += pl.lpSum([self._get_u_value(alt1, i) - self._get_u_value(alt2, i) for i in range(self.n_criteria)]) \
-                           - self.overestimation[alt1] + self.underestimation[alt1] + self.overestimation[alt2] - self.underestimation[
-                         alt2] >= 1e-6
+            self._model += pl.lpSum(
+                [self._get_u_value(alt1, i) - self._get_u_value(alt2, i) for i in range(self.n_criteria)]) \
+                           - self.overestimation[alt1] + self.underestimation[alt1] + self.overestimation[alt2] - \
+                           self.underestimation[
+                               alt2] >= 1e-6
 
         for alt1, alt2 in self.indifference_relations:
-            self._model += pl.lpSum([self._get_u_value(alt1, i) - self._get_u_value(alt2, i) for i in range(self.n_criteria)]) \
-                           - self.overestimation[alt1] + self.underestimation[alt1] + self.overestimation[alt2] - self.underestimation[alt2] == 0
-
-    @staticmethod
-    def _interpolate(x, x0, x1, y0, y1):
-        return (y0 * (x1 - x) + y1 * (x - x0)) / (x1 - x0)
-
-    def _get_u_value(self, alternative, criteria):
-        for i in range(self.n_splices[criteria] - 1):
-            if self.splices_list[criteria][i] <= self.data[alternative, criteria] <= self.splices_list[criteria][i + 1]:
-                return self._interpolate(self.data[alternative, criteria], self.splices_list[criteria][i],
-                                         self.splices_list[criteria][i + 1],
-                                         self.u_splices_list[criteria][i], self.u_splices_list[criteria][i + 1])
+            self._model += pl.lpSum(
+                [self._get_u_value(alt1, i) - self._get_u_value(alt2, i) for i in range(self.n_criteria)]) \
+                           - self.overestimation[alt1] + self.underestimation[alt1] + self.overestimation[alt2] - \
+                           self.underestimation[alt2] == 0
 
     def _solve(self):
         self._model.solve(pl.GLPK())
