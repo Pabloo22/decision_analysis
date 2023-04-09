@@ -46,15 +46,15 @@ def test_kendall_distance(ranking_a, ranking_b, expected):
     assert ranking_a.kendall_distance(ranking_b) == expected
 
 
-@pytest.mark.parametrize("ranking1, ranking2, expected", [
+@pytest.mark.parametrize("ranking_a, ranking_b, expected", [
     (ranking1(), ranking1(), 1),
     (ranking1(), ranking2(), pytest.approx(2 / 3)),
     (ranking2(), ranking1(), pytest.approx(2 / 3)),
     (ranking1(), ranking3(), -1),
     (ranking3(), ranking1(), -1),
 ])
-def test_kendall_tau(ranking1, ranking2, expected):
-    assert ranking1.kendall_tau(ranking2) == expected
+def test_kendall_tau(ranking_a, ranking_b, expected):
+    assert ranking_a.kendall_tau(ranking_b) == expected
 
 
 if __name__ == "__main__":
