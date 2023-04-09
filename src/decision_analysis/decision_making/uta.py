@@ -2,7 +2,7 @@ from pulp import LpProblem, LpVariable, LpMinimize, LpConstraint, lpSum, GLPK
 import pulp as pl
 import numpy as np
 
-from src.decision_analysis.decision_making import Dataset
+from src.decision_analysis.decision_making import Dataset, Ranking
 
 
 class UTA:
@@ -89,7 +89,7 @@ class UTA:
             and underestimation errors. If the value is 0, the problem has a feasible solution.
         """
 
-    def find_minimal_inconsistent_subset(self) -> list[tuple[str, str]]:
+    def find_minimal_inconsistent_subset(self, ranking: Ranking) -> list[tuple[str, str]]:
         """Finds a minimal subset of constraints that need to be removed to restore consistency.
 
         This method solves a linear programming problem similar to the one used to solve the ordinal
@@ -97,6 +97,9 @@ class UTA:
         minimize the sum of binary variables which are 1 if the corresponding preference relation has to be removed
         from the preference relations to obtain a consistent set, and 0 otherwise. These binary variables substitute
         the overestimation and underestimation variables used to solve the mentioned ordinal regression problem.
+
+        Args:
+            ranking: The ranking that we want to check for consistency.
 
         Returns:
             A list of tuples containing the names of the alternatives that are involved in the preference relations
