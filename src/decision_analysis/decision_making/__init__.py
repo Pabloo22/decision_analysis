@@ -6,3 +6,4 @@ from .electre_tri_b import ElectreTriB
 from .utils import find_dominated_alternatives
 from .dataset import Dataset
 from .uta import UTA
+from .ranking import Ranking
