@@ -1,4 +1,6 @@
 import pulp
+import pytest
+
 from src.decision_analysis.decision_making import ValueFunction
 
 
@@ -17,3 +19,40 @@ def test_linear_interpolation():
            pulp_vars[10]
     assert ValueFunction.linear_interpolation(7.5, 5, 10, pulp_vars[5], pulp_vars[10]) == 0.5 * pulp_vars[5] + 0.5 * \
            pulp_vars[10]
+
+
+def test_value_function_instantiation():
+    vf = ValueFunction(characteristic_points_locations=[0, 5, 10])
+    assert vf.characteristic_points_locations == [0, 5, 10]
+    assert vf.characteristic_points_values is None
+    assert vf.characteristic_points_value_variable is None
+
+
+def test_value_function_n_break_points():
+    vf = ValueFunction(characteristic_points_locations=[0, 5, 10])
+    assert vf.n_break_points == 1
+
+
+@pytest.mark.parametrize("value, expected", [
+    (0, 0),
+    (5, 5),
+    (2.5, 2.5),
+    (10, 10),
+])
+def test_value_function_call(value, expected):
+    vf = ValueFunction(
+        characteristic_points_locations=[0, 5, 10],
+        characteristic_points_values=[0, 5, 10]
+    )
+    assert vf(value) == expected
+
+
+def test_value_function_call_error():
+    vf = ValueFunction(characteristic_points_locations=[0, 5, 10])
+    with pytest.raises(ValueError,
+                       match="The characteristic points values must be set before calling the value function"):
+        vf(2.5)
+
+
+if __name__ == "__main__":
+    pytest.main()

@@ -92,10 +92,12 @@ class ValueFunction:
         characteristic_points = list(zip(self.characteristic_points_locations, self.characteristic_points_values))
 
         for i, (x, y) in enumerate(characteristic_points):
-            if value >= x:
+            if value > x:
                 continue
             if i == 0:
                 return y
 
             previous_x, previous_y = characteristic_points[i - 1]
             return self.linear_interpolation(value, previous_x, x, previous_y, y)
+
+        return self.characteristic_points_values[-1]
