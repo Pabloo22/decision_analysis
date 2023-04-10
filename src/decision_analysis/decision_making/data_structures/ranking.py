@@ -56,7 +56,7 @@ class Ranking:
 
     @staticmethod
     def from_dict(ranking: dict[str, int]) -> 'Ranking':
-        """Create a matrix from a list of preference relations.
+        """Create a ranking from a list of preference relations.
 
         Args:
             ranking (dict): A dictionary with the position of each alternative in the ranking. The keys are the
@@ -82,7 +82,7 @@ class Ranking:
         return Ranking(matrix, alternative_names)
 
     def from_comparisons(self, comparisons: Sequence[Comparison]):
-        """Create a matrix from a list of comparisons."""
+        """Updates the matrix from a list of comparisons."""
         for comparison in comparisons:
             if comparison.type == ComparisonType.PREFERENCE:
                 self.add_preference(comparison.alternative_1, comparison.alternative_2)
