@@ -12,7 +12,8 @@ class Ranking:
     A ranking is a graph where each node is an alternative and each edge represents a preference relation between the
     alternatives. The ranking is represented as a matrix where the rows and columns are the alternatives and the value
     in the cell (i, j) is 1 if the alternative i is preferred to the alternative j, 0.5 if the alternatives are
-    indifferent and 0 if the alternative j is preferred to the alternative i.
+    indifferent and 0 if the alternative i is not at leas as good as the alternative j. If i is not as good as j, and
+    j is not as good as i, then Matrix[i, j] = 0 and Matrix[j, i] = 0, this is the way we encode incomparability.
 
     Args:
         alternatives (int or list[str]): The number of alternatives or a list with the names of the alternatives. If
@@ -96,6 +97,7 @@ class Ranking:
             title (str): Title of the plot.
             seed (int): Seed for the random number generator.
         """
+        # TODO: Implement the visualization of the ranking
 
     def _get_alternative_index(self, alternative: Union[int, str]) -> int:
         """Get the index of an alternative.
