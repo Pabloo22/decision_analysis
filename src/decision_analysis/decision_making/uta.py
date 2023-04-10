@@ -88,7 +88,7 @@ class UTA:
         Returns:
             A list of Comparison objects that need to be removed to restore consistency.
         """
-        inconsistency_vars = pulp.LpVariable.dicts("v", range(len(self.comparisons)), cat="Binary")
+        inconsistency_vars = pulp.LpVariable.dicts("v", range(1, len(self.comparisons) + 1), cat="Binary")
 
         # Add the variables to the dictionary
         self._inconsistency_prob_variables.update(inconsistency_vars)
@@ -114,6 +114,8 @@ class UTA:
             elif comparison.type == ComparisonType.INDIFFERENCE:
                 self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] <= self._epsilon
                 self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self._epsilon
+
+        self._add_general_constraints(self.inconsistency_prob, self._inconsistency_prob_variables)
 
         self.inconsistency_prob.solve(pulp.GLPK())
 
@@ -170,7 +172,7 @@ class UTA:
 
         return pulp.lpSum(affine_expressions)
 
-    def _add_general_constraints(self, prob: pulp.LpProblem) -> None:
+    def _add_general_constraints(self, prob: pulp.LpProblem, variables: dict[str, pulp.LpVariable]) -> None:
         """Adds the general constraints to the model.
 
         The general constraints are the ones that are common to both ordinal regression problems:
