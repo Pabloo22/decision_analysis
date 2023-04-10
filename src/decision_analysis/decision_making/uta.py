@@ -1,6 +1,6 @@
 import pulp
 
-from src.decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType
+from src.decision_analysis.decision_making import Dataset, Ranking, Comparison
 
 
 class UTA:
@@ -27,8 +27,33 @@ class UTA:
         self.comparisons = comparisons
         self.preference_info_ranking = Ranking(alternatives=dataset.alternative_names)
         self.preference_info_ranking.add_comparisons(comparisons)
-
         self.epsilon = epsilon
+        # Check value_function.characteristic_points_locations and compare if they are within the range of the
+        # dataset
+        for i, criterion in enumerate(self.dataset.criteria):
+            min_dataset_i = self.dataset.data[:, i].min()
+            max_dataset_i = self.dataset.data[:, i].max()
+            for location in criterion.value_function.characteristic_points_locations:
+                if location < min_dataset_i or location > max_dataset_i:
+                    raise ValueError(f"{location} is not within the range of the dataset for criterion "
+                                     f"{self.dataset.criteria[i].name}")
+            if min_dataset_i not in criterion.value_function.characteristic_points_locations:
+                raise ValueError(f"{min_dataset_i} is not in the dataset for criterion "
+                                 f"{self.dataset.criteria[i].name}")
+            if max_dataset_i not in criterion.value_function.characteristic_points_locations:
+                raise ValueError(f"{max_dataset_i} is not in the dataset for criterion "
+                                 f"{self.dataset.criteria[i].name}")
+
+
+    @property
+    def n_alternatives(self):
+        return len(self.dataset.data.shape[0])
+
+    @property
+    def n_criteria(self):
+        return len(self.dataset.data.shape[1])
+
+
 
     def find_minimal_inconsistent_subset(self, ranking: Ranking) -> list[Comparison]:
         """Finds a minimal subset of constraints that need to be removed to restore consistency.
