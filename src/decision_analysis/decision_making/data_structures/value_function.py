@@ -1,7 +1,9 @@
 import pulp
+from dataclasses import dataclass
 from typing import Optional, Union
 
 
+@dataclass
 class ValueFunction:
     """A class representing a value function.
 
@@ -11,17 +13,13 @@ class ValueFunction:
         characteristic_points_values (list[float]): The y coordinates of the characteristic points of the value
             function. This list must contain the same number of elements as the characteristic_points_locations list
             before calling the __call__ method.
-        characteristic_points_value_variable (list[pulp.LpVariable]): The pulp variables representing the y coordinates
-            of the characteristic points of the value function. This is useful for UTA method particularly.
     """
 
     def __init__(self,
                  characteristic_points_locations: list[float],
-                 characteristic_points_values: Optional[list[float]] = None,
-                 characteristic_points_value_variable: Optional[list[pulp.LpVariable]] = None):
+                 characteristic_points_values: Optional[list[float]] = None):
         self.characteristic_points_locations = characteristic_points_locations
         self.characteristic_points_values = characteristic_points_values
-        self.characteristic_points_value_variable = characteristic_points_value_variable
 
     @property
     def n_break_points(self) -> int:
