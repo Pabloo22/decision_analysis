@@ -89,6 +89,23 @@ class Ranking:
             elif comparison.type == ComparisonType.INDIFFERENCE:
                 self.add_indifference(comparison.alternative_1, comparison.alternative_2)
 
+    def get_comparisons(self) -> list[Comparison]:
+        """Returns the list of comparisons from the ranking.
+
+        Indifference relations are only returned once, for example, if the alternatives 1 and 2 are indifferent, the
+        comparison (1, 2) is returned, but not (2, 1).
+        """
+        comparisons = []
+        for i in range(self.n_alternatives):
+            for j in range(self.n_alternatives):
+                if i == j:
+                    continue
+                if self.matrix[i, j] == 1:
+                    comparisons.append(Comparison(i, j, ComparisonType.PREFERENCE))
+                elif self.matrix[i, j] == 0.5 and i < j:
+                    comparisons.append(Comparison(i, j, ComparisonType.INDIFFERENCE))
+        return comparisons
+
     def remove_comparisons(self, comparisons: Sequence[Comparison]):
         """Remove a list of comparisons."""
         for comparison in comparisons:
