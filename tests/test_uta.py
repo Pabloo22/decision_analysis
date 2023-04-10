@@ -17,6 +17,8 @@ def test_pulp_glpk():
     assert pulp.LpStatus[prob.status] == "Optimal"
     assert x.value() == 0.5
     assert y.value() == 0.5
+    # Value of the objective function
+    assert pulp.value(prob.objective) == 1.5
 
 
 def get_simple_example_dataset():
