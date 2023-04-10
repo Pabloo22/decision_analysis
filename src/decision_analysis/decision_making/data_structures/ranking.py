@@ -81,8 +81,8 @@ class Ranking:
                     matrix[i, j] = 0.5
         return Ranking(matrix, alternative_names)
 
-    def from_comparisons(self, comparisons: Sequence[Comparison]):
-        """Updates the matrix from a list of comparisons."""
+    def add_comparisons(self, comparisons: Sequence[Comparison]):
+        """Updates the matrix to represent the given comparisons."""
         for comparison in comparisons:
             if comparison.type == ComparisonType.PREFERENCE:
                 self.add_preference(comparison.alternative_1, comparison.alternative_2)

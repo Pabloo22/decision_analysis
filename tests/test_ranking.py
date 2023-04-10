@@ -52,7 +52,7 @@ def test_ranking_from_comparisons():
         Comparison(1, 2, ComparisonType.INDIFFERENCE),
     ]
     ranking = Ranking(alternatives=3)
-    ranking.from_comparisons(comparisons)
+    ranking.add_comparisons(comparisons)
     expected_matrix = np.array([[0, 1, 0], [0, 0, 0.5], [0, 0.5, 0]])
     assert np.array_equal(ranking.matrix, expected_matrix)
 
