@@ -1,4 +1,10 @@
-from .data_structures import Alternative, ValueFunction, Ranking, Criterion, Dataset
+from .data_structures import (Alternative,
+                              ValueFunction,
+                              Ranking,
+                              Criterion,
+                              Dataset,
+                              Comparison,
+                              ComparisonType)
 from .promethee import Promethee
 from .srf import srf
 from .electre_tri_b import ElectreTriB
