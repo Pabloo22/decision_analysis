@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-
-from typing import Optional
+from typing import Optional, Union
 
 from .value_function import ValueFunction
 
@@ -10,14 +9,15 @@ class Criterion:
     """A class representing a criterion in the decision analysis.
 
     Attributes:
-        type (int): If the criterion is benefit or cost (1 or -1).
+        type (int): Type of the criterion. Can be either gain or cost. Their values are 1 and -1, respectively. Default
+            is 1.
         weight (float): Weight of the criterion. Optional, default 1.
         name (str): Name of the criterion. Optional.
         preference_threshold (float): Preference threshold for the criterion. Optional.
         indifference_threshold (float): Indifference threshold for the criterion. Optional.
         veto_threshold (float): Veto threshold for the criterion. Optional.
     """
-    type: int
+    type: Union[int, str]
     weight: float = 1.
     name: Optional[str] = None
     preference_threshold: Optional[float] = None
@@ -33,6 +33,16 @@ class Criterion:
             self.name = Criterion._default_name
             Criterion._update_default_name()
 
+        if isinstance(self.type, str):
+            mapper = {'gain': 1, 'cost': -1}
+            if self.type not in mapper:
+                raise ValueError(f'Invalid criterion type: {self.type}')
+            self.type = mapper[self.type]
+
+    def is_gain(self) -> bool:
+        """Returns True if the criterion is a gain, False otherwise."""
+        return self.type == 1
+
     @staticmethod
     def _update_default_name() -> None:
         """Updates the default name of the criterion."""
@@ -41,8 +51,3 @@ class Criterion:
     def reset_default_name(self) -> None:
         """Resets the default name of the criterion."""
         self._default_name = 'g1'
-
-    @staticmethod
-    def linear_interpolation(x: float, x1: float, x2: float, y1: float, y2: float) -> float:
-        """Returns the linear interpolation at the point x."""
-        return y1 + (y2 - y1) * (x - x1) / (x2 - x1)
