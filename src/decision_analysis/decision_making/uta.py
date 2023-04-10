@@ -32,6 +32,12 @@ class UTA:
             A list of Comparison objects that need to be removed to restore consistency.
         """
 
+    def update_value_functions(self) -> None:
+        """Updates the value functions of the dataset based on the results of the model.
+
+        The value functions are the values of the objective function for each alternative.
+        """
+
     def _add_general_constraints(self, model: pulp.LpProblem) -> None:
         """Adds the general constraints to the model.
 
