@@ -28,8 +28,13 @@ class UTA:
         self.preference_info_ranking = Ranking(alternatives=dataset.alternative_names)
         self.preference_info_ranking.add_comparisons(comparisons)
         self.epsilon = epsilon
-        # Check value_function.characteristic_points_locations and compare if they are within the range of the
-        # dataset
+
+        self._value_functions_prob_variables = {}
+        self._inconsistency_prob_variables = {}
+
+    def _check_value_function_locations(self):
+        """Check value_function.characteristic_points_locations and compare if they are within the range of the
+        dataset"""
         for i, criterion in enumerate(self.dataset.criteria):
             min_dataset_i = self.dataset.data[:, i].min()
             max_dataset_i = self.dataset.data[:, i].max()
@@ -44,7 +49,6 @@ class UTA:
                 raise ValueError(f"{max_dataset_i} is not in the dataset for criterion "
                                  f"{self.dataset.criteria[i].name}")
 
-
     @property
     def n_alternatives(self):
         return len(self.dataset.data.shape[0])
@@ -53,9 +57,7 @@ class UTA:
     def n_criteria(self):
         return len(self.dataset.data.shape[1])
 
-
-
-    def find_minimal_inconsistent_subset(self, ranking: Ranking) -> list[Comparison]:
+    def find_minimal_inconsistent_subset(self) -> list[Comparison]:
         """Finds a minimal subset of constraints that need to be removed to restore consistency.
 
         The objective function consist on minimizing the sum of the binary variables that represent the
@@ -73,15 +75,11 @@ class UTA:
         U(a_1) = sum_{i=1}^{n} u_i(g_i(a_1)) where u_i is the value function of criterion i and g_i is the
         performance function of criterion (the value of the alternative in the criterion).
 
-        Args:
-            ranking: The ranking that we want to check for consistency. It does not need to be complete. If the
-                comparison between two alternatives 'i' and 'j' is not present in the ranking, the value of the
-                matrix at position (i, j) and (j, i) is 0.
-
         Returns:
             A list of Comparison objects that need to be removed to restore consistency.
         """
         inconsistency_vars = pulp.LpVariable.dicts("inconsistency", range(len(self.comparisons)), cat="Binary")
+        self._inconsistency_prob_variables.update(inconsistency_vars)
 
         # Objective function
         self.inconsistency_prob += pulp.lpSum(inconsistency_vars)
@@ -147,8 +145,7 @@ class UTA:
 
         The general constraints are the ones that are common to both ordinal regression problems:
             * Normalization constraint:
-                sum_{i=1}^{n} u_i(g_i(a)) = 1 for all a in A.
-
+                sum_{i=1}^{n} u_i(g_i(beta)) = 1 where beta is the best value of the dataset for criterion i.
             * Monotonicity constraint:
                 u_i(x_j) <= u_i(x_{j+1}) where x_j is the value_function.characteristic_points_locations[j]
                 of dataset.criteria[i].
