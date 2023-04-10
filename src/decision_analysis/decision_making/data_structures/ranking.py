@@ -2,8 +2,19 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
+import enum
+from typing import Optional, Union, NamedTuple, Sequence
 
-from typing import Optional, Union
+
+class ComparisonType(enum.Enum):
+    PREFERENCE = enum.auto()
+    INDIFFERENCE = enum.auto()
+
+
+class Comparison(NamedTuple):
+    alternative_1: int
+    alternative_2: int
+    type: ComparisonType
 
 
 class Ranking:
@@ -69,6 +80,19 @@ class Ranking:
                 elif ranking[alternative_names[i]] == ranking[alternative_names[j]]:
                     matrix[i, j] = 0.5
         return Ranking(matrix, alternative_names)
+
+    def from_comparisons(self, comparisons: Sequence[Comparison]):
+        """Create a matrix from a list of comparisons."""
+        for comparison in comparisons:
+            if comparison.type == ComparisonType.PREFERENCE:
+                self.add_preference(comparison.alternative_1, comparison.alternative_2)
+            elif comparison.type == ComparisonType.INDIFFERENCE:
+                self.add_indifference(comparison.alternative_1, comparison.alternative_2)
+
+    def remove_comparisons(self, comparisons: Sequence[Comparison]):
+        """Remove a list of comparisons."""
+        for comparison in comparisons:
+            self.add_incomparability(comparison.alternative_1, comparison.alternative_2)
 
     def get_preference_relations(self) -> list[tuple[str, str]]:
         """List with the preference relations in the ranking."""
@@ -169,10 +193,3 @@ class Ranking:
             float: The Kendall tau.
         """
         return 1 - 4 * self.kendall_distance(other) / (self.n_alternatives * (self.n_alternatives - 1))
-
-
-if __name__ == "__main__":
-    ranking_dict = {'a_1': 1, 'a_2': 2, 'a_3': 3, 'a_4': 4}
-    ranking = Ranking(4)
-    ranking.from_dict(ranking_dict)
-    print(ranking.matrix)
