@@ -1,9 +1,7 @@
 import pulp
-from dataclasses import dataclass
 from typing import Optional, Union
 
 
-@dataclass
 class ValueFunction:
     """A class representing a value function.
 
