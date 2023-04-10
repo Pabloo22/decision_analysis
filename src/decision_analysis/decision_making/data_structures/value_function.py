@@ -76,24 +76,36 @@ class ValueFunction:
                              x1: float,
                              x2: float,
                              y1: Union[float, pulp.LpVariable],
-                             y2: Union[float, pulp.LpVariable]) -> Union[float, pulp.LpVariable]:
+                             y2: Union[float, pulp.LpVariable]) -> Union[float, pulp.LpAffineExpression]:
         """Returns the linear interpolation at the point x."""
         return y1 + (y2 - y1) * (x - x1) / (x2 - x1)
 
-    def __call__(self, value: float):
+    @staticmethod
+    def piecewise_linear_interpolation(x: float,
+                                       characteristic_points: list[tuple[float, Union[float, pulp.LpVariable]]],
+                                       ) -> Union[float, pulp.LpAffineExpression]:
+        """Returns the piecewise linear interpolation at the point x.
+        Args:
+            x (float): The point at which the interpolation is computed.
+            characteristic_points (list[tuple[float, Union[float, pulp.LpVariable]]]): The characteristic points of the
+                value function. The first element of the tuple is the x coordinate and the second element is the y
+                coordinate, which can be a float or a pulp.LpVariable.
+        """
+        for i, (x_i, y_i) in enumerate(characteristic_points):
+            if x > x_i:
+                continue
+            if i == 0:
+                return y_i
+
+            previous_x, previous_y = characteristic_points[i - 1]
+            return ValueFunction.linear_interpolation(x, previous_x, x_i, previous_y, y_i)
+
+        return characteristic_points[-1][1]
+
+    def __call__(self, value: float) -> float:
         """Returns the value of the value function at the given value."""
         if self.characteristic_points_values is None:
             raise ValueError("The characteristic points values must be set before calling the value function")
 
         characteristic_points = list(zip(self.characteristic_points_locations, self.characteristic_points_values))
-
-        for i, (x, y) in enumerate(characteristic_points):
-            if value > x:
-                continue
-            if i == 0:
-                return y
-
-            previous_x, previous_y = characteristic_points[i - 1]
-            return self.linear_interpolation(value, previous_x, x, previous_y, y)
-
-        return self.characteristic_points_values[-1]
+        return ValueFunction.piecewise_linear_interpolation(value, characteristic_points)

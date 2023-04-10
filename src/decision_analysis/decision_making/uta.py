@@ -1,6 +1,6 @@
 import pulp
 
-from src.decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType
+from src.decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType, ValueFunction
 
 
 class UTA:
@@ -19,35 +19,45 @@ class UTA:
         dataset: The dataset that we want to analyze.
         comparisons: The comparisons made by the decision maker.
     """
-    def __init__(self, dataset: Dataset, comparisons: Comparison, epsilon: float = 0.0001):
+    def __init__(self, dataset: Dataset, comparisons: Comparison):
         self.dataset = dataset
 
         self.value_functions_prob = pulp.LpProblem("Find value functions", pulp.LpMinimize)
         self.inconsistency_prob = pulp.LpProblem("Find inconsistency", pulp.LpMinimize)
+
         self.comparisons = comparisons
         self.preference_info_ranking = Ranking(alternatives=dataset.alternative_names)
         self.preference_info_ranking.add_comparisons(comparisons)
-        self.epsilon = epsilon
+
+        self._epsilon = 1e-6
 
         self._value_functions_prob_variables = {}
         self._inconsistency_prob_variables = {}
+
+        self._min_values = []
+        self._max_values = []
+
+        for i, criterion in enumerate(self.dataset.criteria):
+            self._min_values.append(self.dataset.data[:, i].min())
+            self._max_values.append(self.dataset.data[:, i].max())
+
+        self._check_value_function_locations()
 
     def _check_value_function_locations(self):
         """Check value_function.characteristic_points_locations and compare if they are within the range of the
         dataset"""
         for i, criterion in enumerate(self.dataset.criteria):
-            min_dataset_i = self.dataset.data[:, i].min()
-            max_dataset_i = self.dataset.data[:, i].max()
+            if self._min_values[i] not in criterion.value_function.characteristic_points_locations:
+                raise ValueError(f"{self._min_values[i]} is not in the characteristic points locations of "
+                                    f"{criterion.name}")
+            if self._max_values[i] not in criterion.value_function.characteristic_points_locations:
+                raise ValueError(f"{self._max_values[i]} is not in the characteristic points locations of "
+                                    f"{criterion.name}")
+
             for location in criterion.value_function.characteristic_points_locations:
-                if location < min_dataset_i or location > max_dataset_i:
+                if location < self._min_values[i] or location > self._max_values[i]:
                     raise ValueError(f"{location} is not within the range of the dataset for criterion "
                                      f"{self.dataset.criteria[i].name}")
-            if min_dataset_i not in criterion.value_function.characteristic_points_locations:
-                raise ValueError(f"{min_dataset_i} is not in the dataset for criterion "
-                                 f"{self.dataset.criteria[i].name}")
-            if max_dataset_i not in criterion.value_function.characteristic_points_locations:
-                raise ValueError(f"{max_dataset_i} is not in the dataset for criterion "
-                                 f"{self.dataset.criteria[i].name}")
 
     @property
     def n_alternatives(self):
@@ -78,8 +88,15 @@ class UTA:
         Returns:
             A list of Comparison objects that need to be removed to restore consistency.
         """
-        inconsistency_vars = pulp.LpVariable.dicts("inconsistency", range(len(self.comparisons)), cat="Binary")
+        inconsistency_vars = pulp.LpVariable.dicts("v", range(len(self.comparisons)), cat="Binary")
+
+        # Add the variables to the dictionary
         self._inconsistency_prob_variables.update(inconsistency_vars)
+        for i, criterion in enumerate(self.dataset.criteria, start=1):
+            for location in criterion.value_function.characteristic_points_locations:
+                self._inconsistency_prob_variables[f"u_{i}({location})"] = pulp.LpVariable(f"u_{i}({location})",
+                                                                                           lowBound=0,
+                                                                                           upBound=1)
 
         # Objective function
         self.inconsistency_prob += pulp.lpSum(inconsistency_vars)
@@ -88,15 +105,15 @@ class UTA:
         for idx, comparison in enumerate(self.comparisons):
             alternative_i = comparison.alternative_1
             alternative_j = comparison.alternative_2
-            U_ai = self._get_comprehensive_value_equation(alternative_i)
-            U_aj = self._get_comprehensive_value_equation(alternative_j)
+            U_ai = self._get_comprehensive_value_equation(alternative_i, self._inconsistency_prob_variables)
+            U_aj = self._get_comprehensive_value_equation(alternative_j, self._inconsistency_prob_variables)
 
             # Only "<=" comparisons are allowed
             if comparison.type == ComparisonType.PREFERENCE:
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self.epsilon
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self._epsilon
             elif comparison.type == ComparisonType.INDIFFERENCE:
-                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] <= self.epsilon
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self.epsilon
+                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] <= self._epsilon
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self._epsilon
 
         self.inconsistency_prob.solve(pulp.GLPK())
 
@@ -130,7 +147,9 @@ class UTA:
                       for i in range(len(self.dataset.alternative_names))]
             criterion.value_function.characteristic_points_values = values
 
-    def _get_comprehensive_value_equation(self, alternative_idx) -> pulp.LpVariable:
+    def _get_comprehensive_value_equation(self,
+                                          alternative_idx: int,
+                                          variables: dict[str, pulp.LpVariable]) -> pulp.LpVariable:
         """Creates the comprehensive value equation.
 
         The comprehensive value equation is the objective function of the model. It is the sum of the
@@ -139,6 +158,17 @@ class UTA:
         Args:
             alternative_idx: The index of the alternative that we want to evaluate.
         """
+        affine_expressions = []
+        for i, criterion in enumerate(self.dataset.criteria, start=1):
+            locations = criterion.value_function.characteristic_points_locations
+            values = [variables[f"u_{i}({location})"] for location in locations]
+            characteristic_points = list(zip(locations, values))
+
+            x = self.dataset.data[alternative_idx, i]
+
+            affine_expressions.append(ValueFunction.piecewise_linear_interpolation(x, characteristic_points))
+
+        return pulp.lpSum(affine_expressions)
 
     def _add_general_constraints(self, prob: pulp.LpProblem) -> None:
         """Adds the general constraints to the model.

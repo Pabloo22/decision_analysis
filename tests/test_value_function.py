@@ -25,7 +25,6 @@ def test_value_function_instantiation():
     vf = ValueFunction(characteristic_points_locations=[0, 5, 10])
     assert vf.characteristic_points_locations == [0, 5, 10]
     assert vf.characteristic_points_values is None
-    assert vf.characteristic_points_value_variable is None
 
 
 def test_value_function_n_break_points():
