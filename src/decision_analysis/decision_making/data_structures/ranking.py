@@ -67,6 +67,13 @@ class Ranking:
             np.array: Matrix representing the ranking. The rows and columns are the alternatives and the
                 value in the cell (i, j) is 1 if the alternative i is preferred to the alternative j, 0.5 if the
                 alternatives are indifferent and 0 if the alternative j is preferred to the alternative i
+
+        Example:
+            >>> ranking = {'a_1': 1, 'a_2': 2, 'a_3': 3}
+            >>> print(Ranking.from_dict(ranking).matrix)
+            [[0. 1. 1.]
+             [0. 0. 1.]
+             [0. 0. 0.]]
         """
         n_alternatives = len(ranking)
         alternative_names = list(ranking.keys())
@@ -210,3 +217,9 @@ class Ranking:
             float: The Kendall tau.
         """
         return 1 - 4 * self.kendall_distance(other) / (self.n_alternatives * (self.n_alternatives - 1))
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()
