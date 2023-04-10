@@ -1,6 +1,6 @@
 import pulp
 
-from src.decision_analysis.decision_making import Dataset, Ranking, Comparison
+from src.decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType
 
 
 class UTA:
