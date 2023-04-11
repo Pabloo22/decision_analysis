@@ -1,6 +1,8 @@
 import pulp
+import numpy as np
 
 from src.decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType, ValueFunction
+from src.decision_analysis.decision_making.data_structures import Criterion
 
 
 class UTA:
@@ -19,11 +21,12 @@ class UTA:
         dataset: The dataset that we want to analyze.
         comparisons: The comparisons made by the decision maker.
     """
+
     def __init__(self, dataset: Dataset, comparisons: Comparison):
         self.dataset = dataset
 
-        self.value_functions_prob = pulp.LpProblem("Find value functions", pulp.LpMinimize)
-        self.inconsistency_prob = pulp.LpProblem("Find inconsistency", pulp.LpMinimize)
+        self.value_functions_prob = pulp.LpProblem("Find_value_functions", pulp.LpMinimize)
+        self.inconsistency_prob = pulp.LpProblem("Inconsistency", pulp.LpMinimize)
 
         self.comparisons = comparisons
         self.preference_info_ranking = Ranking(alternatives=dataset.alternative_names)
@@ -49,10 +52,10 @@ class UTA:
         for i, criterion in enumerate(self.dataset.criteria):
             if self._min_values[i] not in criterion.value_function.characteristic_points_locations:
                 raise ValueError(f"{self._min_values[i]} is not in the characteristic points locations of "
-                                    f"{criterion.name}")
+                                 f"{criterion.name}")
             if self._max_values[i] not in criterion.value_function.characteristic_points_locations:
                 raise ValueError(f"{self._max_values[i]} is not in the characteristic points locations of "
-                                    f"{criterion.name}")
+                                 f"{criterion.name}")
 
             for location in criterion.value_function.characteristic_points_locations:
                 if location < self._min_values[i] or location > self._max_values[i]:
@@ -102,18 +105,18 @@ class UTA:
         self.inconsistency_prob += pulp.lpSum(inconsistency_vars)
 
         # Constraints for inconsistent comparisons
-        for idx, comparison in enumerate(self.comparisons):
-            alternative_i = comparison.alternative_1
-            alternative_j = comparison.alternative_2
+        for idx, comparison in enumerate(self.comparisons, start=1):
+            alternative_i = self.dataset.alternative_names.index(comparison.alternative_1)
+            alternative_j = self.dataset.alternative_names.index(comparison.alternative_2)
             U_ai = self._get_comprehensive_value_equation(alternative_i, self._inconsistency_prob_variables)
             U_aj = self._get_comprehensive_value_equation(alternative_j, self._inconsistency_prob_variables)
 
             # Only "<=" comparisons are allowed
             if comparison.type == ComparisonType.PREFERENCE:
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self._epsilon
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] >= self._epsilon
             elif comparison.type == ComparisonType.INDIFFERENCE:
-                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] <= self._epsilon
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= self._epsilon
+                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] >= self._epsilon
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] >= self._epsilon
 
         self._add_general_constraints(self.inconsistency_prob, self._inconsistency_prob_variables)
 
@@ -166,7 +169,7 @@ class UTA:
             values = [variables[f"u_{i}({location})"] for location in locations]
             characteristic_points = list(zip(locations, values))
 
-            x = self.dataset.data[alternative_idx, i]
+            x = self.dataset.data[alternative_idx, i - 1]
 
             affine_expressions.append(ValueFunction.piecewise_linear_interpolation(x, characteristic_points))
 
@@ -191,6 +194,30 @@ class UTA:
         Args:
             prob: The problem in which the constraints are added.
         """
+        norm_constraints = []
+        for i, criterion in enumerate(self.dataset.criteria, start=1):
+            locations = criterion.value_function.characteristic_points_locations
+
+            # Normalization constraint
+            if criterion.is_gain():
+                norm_constraints.append(variables[f"u_{i}({max(locations)})"])
+                prob += variables[f"u_{i}({min(locations)})"] == 0
+            else:
+                norm_constraints.append(variables[f"u_{i}({min(locations)})"])
+                prob += variables[f"u_{i}({max(locations)})"] == 0
+
+            # Monotonicity constraint
+            for j in range(len(locations) - 1):
+                if criterion.is_gain():
+                    prob += variables[f"u_{i}({locations[j + 1]})"] >= variables[f"u_{i}({locations[j]})"]
+                else:
+                    prob += variables[f"u_{i}({locations[j + 1]})"] <= variables[f"u_{i}({locations[j]})"]
+
+        prob += pulp.lpSum(norm_constraints) == 1
+
+        # Non-negativity constraint
+        for var in variables.values():
+            prob += var >= 0
 
     def get_comprehensive_values(self) -> dict[str, float]:
         """Gets the comprehensive values of the alternatives.
@@ -238,3 +265,44 @@ class UTA:
         for var in prob.variables():
             print(f"{var.name} = {var.varValue}")
         print(f"Objective function value: {pulp.value(prob.objective)}")
+
+
+if __name__ == "__main__":
+    data = np.array([[5, 0, 10],  # B
+                     [10, 5, 15],  # E
+                     [0, 10, 12.5]])  # I
+    criteria = [Criterion(name='g1', type=1, value_function=ValueFunction([0, 5, 10])),
+                Criterion(name='g2', type=1, value_function=ValueFunction([0, 5, 10])),
+                Criterion(name='g3', type=-1, value_function=ValueFunction([10, 12.5, 15]))]
+    dataset = Dataset(data, criteria, ['B', 'E', 'I'])
+    comparisons = [Comparison('E', 'B', ComparisonType.PREFERENCE),
+                   Comparison('B', 'I', ComparisonType.PREFERENCE),
+                   Comparison('B', 'E', ComparisonType.PREFERENCE)]
+    """min v_{E,B} + v_{B,I} 
+    s.t.
+    U(E) > U(B) - v_{E,B} => U(E) - U(B) + v_{E,B} >= epsilon =>
+    => u_1(10) - u_1(5) + u_2(5) - u_2(0) + u_3(15) - u_3(10) - v_{E,B} >= epsilon
+    U(B) > U(I) - v_{B,I} => U(B) - U(I) + v_{B,I} >= epsilon =>
+    => u_1(5) - u_1(0) + u_2(0) - u_2(10) + u_3(10) - u_3(12.5) - v_{B,I} >= epsilon
+    sum_{i=1}^{n} u_i(g_i(beta)) = 1 for all i => u_1(10) + u_2(10) + u_3(10) = 1
+    u_i(g_i(alpha)) = 0 for all i => 
+    1.- u_1(0) = 0
+    2.- u_2(0) = 0
+    3.- u_3(15) = 0
+    u_i(x_j) <= u_i(x_{j+1}) for all i, j if g_i is a gain criterion =>
+    1.- u_1(5) - u_1(0) >= 0
+    2.- u_1(10) - u_1(5) >= 0
+    3.- u_2(5) - u_2(0) >= 0
+    4.- u_2(10) - u_2(5) >= 0
+    u_i(x_j) >= u_i(x_{j+1}) for all i, j if g_i is a cost criterion =>
+    1.- u_3(10) - u_3(12.5) >= 0
+    2.- u_3(12.5) - u_3(15) >= 0
+    u_i(x_j) >= 0 for all i, j
+    """
+
+    uta = UTA(dataset, comparisons)
+    print(uta.find_minimal_inconsistent_subset())
+    print("-----------------------------")
+    print(uta.inconsistency_prob)
+    print("-----------------------------")
+    UTA.print_model_results(uta.inconsistency_prob)
