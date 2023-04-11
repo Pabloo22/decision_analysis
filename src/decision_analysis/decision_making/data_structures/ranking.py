@@ -16,15 +16,6 @@ class Comparison(NamedTuple):
     alternative_2: int
     type: ComparisonType
 
-    def __post_init__(self):
-        if self.alternative_1 == self.alternative_2:
-            raise ValueError("An alternative cannot be compared to itself")
-        if isinstance(self.type, str):
-            mapper = {'preference': ComparisonType.PREFERENCE, 'indifference': ComparisonType.INDIFFERENCE}
-            if self.type not in mapper:
-                raise ValueError(f'Invalid comparison type: {self.type}')
-            self.type = mapper[self.type]
-
 
 class Ranking:
     """A class representing a ranking of alternatives.
