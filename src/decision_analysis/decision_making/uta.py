@@ -32,7 +32,7 @@ class UTA:
         self.preference_info_ranking = Ranking(alternatives=dataset.alternative_names)
         self.preference_info_ranking.add_comparisons(comparisons)
 
-        self._epsilon = 1e-6
+        self._epsilon = 1e-4
 
         self._value_functions_prob_variables = {}
         self._inconsistency_prob_variables = {}
@@ -92,10 +92,11 @@ class UTA:
         Returns:
             A list of Comparison objects that need to be removed to restore consistency.
         """
-        inconsistency_vars = pulp.LpVariable.dicts("v", range(1, len(self.comparisons) + 1), cat="Binary")
+        inconsistency_vars = [pulp.LpVariable(f"v_{i}", cat="Binary")
+                              for i in range(1, len(self.comparisons) + 1)]
 
         # Add the variables to the dictionary
-        self._inconsistency_prob_variables.update(inconsistency_vars)
+        self._inconsistency_prob_variables = {var.name: var for var in inconsistency_vars}
         for i, criterion in enumerate(self.dataset.criteria, start=1):
             for location in criterion.value_function.characteristic_points_locations:
                 self._inconsistency_prob_variables[f"u_{i}({location})"] = pulp.LpVariable(f"u_{i}({location})",
@@ -114,10 +115,10 @@ class UTA:
 
             # Only "<=" comparisons are allowed
             if comparison.type == ComparisonType.PREFERENCE:
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= -self._epsilon
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= -self._epsilon
             elif comparison.type == ComparisonType.INDIFFERENCE:
-                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] <= 0
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= 0
+                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx - 1] <= 0
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= 0
 
         self._add_general_constraints(self.inconsistency_prob, self._inconsistency_prob_variables)
 
@@ -138,9 +139,12 @@ class UTA:
             A list of Comparison objects that need to be removed to restore consistency.
         """
         inconsistent_comparisons = []
-        for idx, var in enumerate(self.inconsistency_prob.variables()):
-            if var.varValue == 1:
-                inconsistent_comparisons.append(self.comparisons[idx])
+        v_variables = [variable for (name, variable) in self._inconsistency_prob_variables.items()
+                       if isinstance(name, int)]
+        for i, variable in enumerate(v_variables):
+            if variable.varValue == 1:
+                inconsistent_comparisons.append(self.comparisons[i])
+
         return inconsistent_comparisons
 
     def update_value_functions(self) -> None:
@@ -279,8 +283,8 @@ if __name__ == "__main__":
     idx_dict = {'B': 0, 'E': 1, 'I': 2}
 
     comparisons = [Comparison(idx_dict['E'], idx_dict['B'], ComparisonType.PREFERENCE),
-                   Comparison(idx_dict['E'], idx_dict['I'], ComparisonType.PREFERENCE),
-                   Comparison(idx_dict['B'], idx_dict['E'], ComparisonType.PREFERENCE)]
+                   # Comparison(idx_dict['E'], idx_dict['I'], ComparisonType.PREFERENCE),
+                   Comparison(idx_dict['B'], idx_dict['I'], ComparisonType.PREFERENCE)]
     """min v_{E,B} + v_{B,I} 
     s.t.
     U(E) > U(B) - v_{E,B} => U(E) - U(B) + v_{E,B} >= epsilon =>
@@ -309,3 +313,43 @@ if __name__ == "__main__":
     print(uta.inconsistency_prob)
     print("-----------------------------")
     UTA.print_model_results(uta.inconsistency_prob)
+
+    # --------------------------------------
+
+    def get_simple_example_dataset():
+        alternatives = ["X", "Y", "Z"]
+        criteria = [
+            Criterion(type=1, name="g_1", value_function=ValueFunction([0, 10])),
+            Criterion(type=1, name="g_2", value_function=ValueFunction([0, 10])),
+        ]
+        data = np.array([[10, 0],
+                         [0, 10],
+                         [5, 5]])
+
+        dataset = Dataset(data, criteria, alternatives)
+        return dataset
+
+
+    def get_ranking1():
+        ranking_dict = {"X": 1, "Y": 2, "Z": 3}
+        return Ranking.from_dict(ranking_dict)
+
+
+    def get_ranking2():
+        ranking_dict = {"X": 1, "Y": 3, "Z": 2}
+        return Ranking.from_dict(ranking_dict)
+
+
+    def simple_example():
+        dataset = get_simple_example_dataset()
+        ranking = get_ranking1()
+        comparisons = ranking.get_comparisons()
+        uta = UTA(dataset, comparisons)
+        uta.find_minimal_inconsistent_subset()
+        print(uta.inconsistency_prob)
+        print("-----------------------------")
+        UTA.print_model_results(uta.inconsistency_prob)
+
+    print("\nSimple example")
+    print("-----------------------------")
+    simple_example()
