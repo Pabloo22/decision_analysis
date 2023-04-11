@@ -25,17 +25,12 @@ class UTA:
     def __init__(self, dataset: Dataset, comparisons: list[Comparison]):
         self.dataset = dataset
 
-        self.value_functions_prob = pulp.LpProblem("Find_value_functions", pulp.LpMinimize)
-        self.inconsistency_prob = pulp.LpProblem("Inconsistency", pulp.LpMinimize)
+        self.prob = pulp.LpProblem("LinearProblem", pulp.LpMinimize)
 
         self.comparisons = comparisons
-        self.preference_info_ranking = Ranking(alternatives=dataset.alternative_names)
-        self.preference_info_ranking.add_comparisons(comparisons)
 
         self._epsilon = 1e-4
-
-        self._value_functions_prob_variables = {}
-        self._inconsistency_prob_variables = {}
+        self._prob_variables = {}
 
         self._min_values = []
         self._max_values = []
@@ -70,7 +65,7 @@ class UTA:
     def n_criteria(self):
         return len(self.dataset.data.shape[1])
 
-    def find_minimal_inconsistent_subset(self) -> list[Comparison]:
+    def solve(self):
         """Finds a minimal subset of constraints that need to be removed to restore consistency.
 
         The objective function consist on minimizing the sum of the binary variables that represent the
@@ -96,37 +91,35 @@ class UTA:
                               for i in range(1, len(self.comparisons) + 1)]
 
         # Add the variables to the dictionary
-        self._inconsistency_prob_variables = {var.name: var for var in inconsistency_vars}
+        self._prob_variables = {var.name: var for var in inconsistency_vars}
         for i, criterion in enumerate(self.dataset.criteria, start=1):
             for location in criterion.value_function.characteristic_points_locations:
-                self._inconsistency_prob_variables[f"u_{i}({location})"] = pulp.LpVariable(f"u_{i}({location})",
-                                                                                           lowBound=0,
-                                                                                           upBound=1)
+                self._prob_variables[f"u_{i}({location})"] = pulp.LpVariable(f"u_{i}({location})",
+                                                                             lowBound=0,
+                                                                             upBound=1)
 
         # Objective function
-        self.inconsistency_prob += pulp.lpSum(inconsistency_vars)
+        self.prob += pulp.lpSum(inconsistency_vars)
 
         # Constraints for inconsistent comparisons
         for idx, comparison in enumerate(self.comparisons, start=1):
             alternative_i = comparison.alternative_1
             alternative_j = comparison.alternative_2
-            U_ai = self._get_comprehensive_value_equation(alternative_i, self._inconsistency_prob_variables)
-            U_aj = self._get_comprehensive_value_equation(alternative_j, self._inconsistency_prob_variables)
+            U_ai = self._get_comprehensive_value_equation(alternative_i, self._prob_variables)
+            U_aj = self._get_comprehensive_value_equation(alternative_j, self._prob_variables)
 
             # Only "<=" comparisons are allowed
             if comparison.type == ComparisonType.PREFERENCE:
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= -self._epsilon
+                self.prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= -self._epsilon
             elif comparison.type == ComparisonType.INDIFFERENCE:
-                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx - 1] <= 0
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= 0
+                self.prob += U_ai - U_aj - inconsistency_vars[idx - 1] <= 0
+                self.prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= 0
 
-        self._add_general_constraints(self.inconsistency_prob, self._inconsistency_prob_variables)
+        self._add_general_constraints(self.prob, self._prob_variables)
 
-        self.inconsistency_prob.solve(pulp.GLPK())
+        self.prob.solve(pulp.GLPK(msg=False))
 
-        return self._get_inconsistent_comparisons()
-
-    def _get_inconsistent_comparisons(self) -> list[Comparison]:
+    def get_inconsistent_comparisons(self) -> list[Comparison]:
         """Creates the inconsistent comparisons based on the results of the inconsistency model.
 
         If the binary variable that represents the comparison between two alternatives is 1, then the comparison
@@ -139,7 +132,7 @@ class UTA:
             A list of Comparison objects that need to be removed to restore consistency.
         """
         inconsistent_comparisons = []
-        v_variables = [variable for (name, variable) in self._inconsistency_prob_variables.items()
+        v_variables = [variable for (name, variable) in self._prob_variables.items()
                        if isinstance(name, int)]
         for i, variable in enumerate(v_variables):
             if variable.varValue == 1:
@@ -152,9 +145,9 @@ class UTA:
 
         The value functions are the values of the objective function for each alternative.
         """
-        for criterion in self.dataset.criteria:
-            values = [self.value_functions_prob.variables()[i].varValue
-                      for i in range(len(self.dataset.alternative_names))]
+        for i, criterion in enumerate(self.dataset.criteria, start=1):
+            values = [self._prob_variables[f"u_{i}({location})"].varValue
+                      for location in criterion.value_function.characteristic_points_locations]
             criterion.value_function.characteristic_points_values = values
 
     def _get_comprehensive_value_equation(self,
@@ -308,11 +301,8 @@ if __name__ == "__main__":
     """
 
     uta = UTA(dataset, comparisons)
-    print(uta.find_minimal_inconsistent_subset())
-    print("-----------------------------")
-    print(uta.inconsistency_prob)
-    print("-----------------------------")
-    UTA.print_model_results(uta.inconsistency_prob)
+    uta.solve()
+    UTA.print_model_results(uta.prob)
 
     # --------------------------------------
 
@@ -345,11 +335,9 @@ if __name__ == "__main__":
         ranking = get_ranking1()
         comparisons = ranking.get_comparisons()
         uta = UTA(dataset, comparisons)
-        uta.find_minimal_inconsistent_subset()
-        print(uta.inconsistency_prob)
-        print("-----------------------------")
-        UTA.print_model_results(uta.inconsistency_prob)
+        uta.solve()
+        UTA.print_model_results(uta.prob)
 
     print("\nSimple example")
-    print("-----------------------------")
+    print("---")
     simple_example()
