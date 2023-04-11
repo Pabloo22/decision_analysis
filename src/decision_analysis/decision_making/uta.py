@@ -22,7 +22,7 @@ class UTA:
         comparisons: The comparisons made by the decision maker.
     """
 
-    def __init__(self, dataset: Dataset, comparisons: Comparison):
+    def __init__(self, dataset: Dataset, comparisons: list[Comparison]):
         self.dataset = dataset
 
         self.value_functions_prob = pulp.LpProblem("Find_value_functions", pulp.LpMinimize)
@@ -80,7 +80,8 @@ class UTA:
 
         The specific constraints of this model can be represented as follows:
         U(a_1) > U(a_2) - v_1 if a_1 is preferred to a_2 by the decision maker. This is represented by:
-        U(a_2) - U(a_1) - v_1 <= epsilon
+        U(a_1) >= U(a_2) - v_1 + epsilon
+        U(a_2) - U(a_1) - v_1 <= -epsilon
 
         U(a_1) is the comprehensive value of alternative a_1. It is the sum of the value functions of all
         the criteria:
@@ -106,17 +107,17 @@ class UTA:
 
         # Constraints for inconsistent comparisons
         for idx, comparison in enumerate(self.comparisons, start=1):
-            alternative_i = self.dataset.alternative_names.index(comparison.alternative_1)
-            alternative_j = self.dataset.alternative_names.index(comparison.alternative_2)
+            alternative_i = comparison.alternative_1
+            alternative_j = comparison.alternative_2
             U_ai = self._get_comprehensive_value_equation(alternative_i, self._inconsistency_prob_variables)
             U_aj = self._get_comprehensive_value_equation(alternative_j, self._inconsistency_prob_variables)
 
             # Only "<=" comparisons are allowed
             if comparison.type == ComparisonType.PREFERENCE:
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] >= self._epsilon
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= -self._epsilon
             elif comparison.type == ComparisonType.INDIFFERENCE:
-                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] >= self._epsilon
-                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] >= self._epsilon
+                self.inconsistency_prob += U_ai - U_aj - inconsistency_vars[idx] <= 0
+                self.inconsistency_prob += U_aj - U_ai - inconsistency_vars[idx] <= 0
 
         self._add_general_constraints(self.inconsistency_prob, self._inconsistency_prob_variables)
 
@@ -275,9 +276,11 @@ if __name__ == "__main__":
                 Criterion(name='g2', type=1, value_function=ValueFunction([0, 5, 10])),
                 Criterion(name='g3', type=-1, value_function=ValueFunction([10, 12.5, 15]))]
     dataset = Dataset(data, criteria, ['B', 'E', 'I'])
-    comparisons = [Comparison('E', 'B', ComparisonType.PREFERENCE),
-                   Comparison('B', 'I', ComparisonType.PREFERENCE),
-                   Comparison('B', 'E', ComparisonType.PREFERENCE)]
+    idx_dict = {'B': 0, 'E': 1, 'I': 2}
+
+    comparisons = [Comparison(idx_dict['E'], idx_dict['B'], ComparisonType.PREFERENCE),
+                   Comparison(idx_dict['E'], idx_dict['I'], ComparisonType.PREFERENCE),
+                   Comparison(idx_dict['B'], idx_dict['E'], ComparisonType.PREFERENCE)]
     """min v_{E,B} + v_{B,I} 
     s.t.
     U(E) > U(B) - v_{E,B} => U(E) - U(B) + v_{E,B} >= epsilon =>
