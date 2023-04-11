@@ -1,7 +1,8 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-import seaborn as sns
+import warnings
+
 import enum
 from typing import Optional, Union, NamedTuple, Sequence
 
@@ -141,11 +142,66 @@ class Ranking:
     def visualize(self, title: Optional[str] = None, seed: Optional[int] = None):
         """Visualize the ranking.
 
+        if receiving an ImportError, try to install the optional dependencies:
+        https://pygraphviz.github.io/documentation/stable/install.html
+
         Args:
             title (str): Title of the plot.
             seed (int): Seed for the random number generator.
         """
-        # TODO: Implement the visualization of the ranking
+        graph = nx.DiGraph()
+
+        # Add nodes and edges to the graph
+        for i, alternative in enumerate(self.alternative_names):
+            graph.add_node(alternative)
+
+        preference_relations = self.get_preference_relations()
+        # Remove transitive edges
+        graph_temp = nx.DiGraph()
+        for (u, v) in preference_relations:
+            graph_temp.add_edge(u, v)
+
+        graph_reduced = nx.transitive_reduction(graph_temp)
+        preference_relations = [(u, v) for (u, v) in graph_reduced.edges()]
+
+        indifference_relations = self.get_indifference_relations()
+
+        for (u, v) in preference_relations:
+            graph.add_edge(u, v, type='preference')
+
+        for (u, v) in indifference_relations:
+            graph.add_edge(u, v, type='indifference')
+            graph.add_edge(v, u, type='indifference')
+
+        # Set positions of nodes
+        if seed is not None:
+            np.random.seed(seed)
+
+        try:
+            pos = nx.drawing.nx_agraph.graphviz_layout(graph, prog='dot')
+        except ImportError:
+            warnings.warn('pygraphviz is not installed. Using spring layout instead. To install pygraphviz, '
+                          'follow the instructions in https://pygraphviz.github.io/documentation/stable/install.html')
+            pos = nx.spring_layout(graph, seed=seed)
+
+        # Draw nodes and labels
+        nx.draw_networkx_nodes(graph, pos, node_color='skyblue', node_size=2000)
+        nx.draw_networkx_labels(graph, pos, font_size=12, font_weight='bold')
+
+        # Draw preference edges
+        preference_edges = [(u, v) for (u, v, d) in graph.edges(data=True) if d['type'] == 'preference']
+        nx.draw_networkx_edges(graph, pos, edgelist=preference_edges, edge_color='b',
+                               arrowsize=20, node_size=2000, arrowstyle='->')
+
+        # Draw indifference edges
+        indifference_edges = [(u, v) for (u, v, d) in graph.edges(data=True) if d['type'] == 'indifference']
+        nx.draw_networkx_edges(graph, pos, edgelist=indifference_edges, edge_color='g', style='dashed', arrowsize=20)
+
+        # Set title and display the plot
+        if title is not None:
+            plt.title(title)
+        plt.axis('off')
+        plt.show()
 
     def _get_alternative_index(self, alternative: Union[int, str]) -> int:
         """Get the index of an alternative.
@@ -223,3 +279,10 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
+
+    ranking = Ranking(alternatives=4)
+    ranking.add_preference(1, 0)
+    ranking.add_preference(1, 2)
+    ranking.add_preference(0, 3)
+    ranking.add_preference(1, 3)
+    ranking.visualize(title="Example Ranking", seed=42)
