@@ -13,7 +13,7 @@ class UTA:
 
     The optimal value functions are found by inferring the value of some specific breakpoints of the value
     functions. These breakpoints are defined when creating the criteria of the dataset by setting
-    the characteristic_points_locations attribute of the value function of each criterion.
+    the characteristic_points_locations attribute of the value function for each criterion.
 
     This class also implements the method to find the minimal inconsistent subset of comparisons.
 
@@ -41,9 +41,13 @@ class UTA:
 
         self._check_value_function_locations()
 
-    def _check_value_function_locations(self):
+    def _check_value_function_locations(self) -> None:
         """Check value_function.characteristic_points_locations and compare if they are within the range of the
-        dataset"""
+        dataset.
+
+        Raises:
+            ValueError: If the characteristic points locations are not within the range of the dataset.
+        """
         for i, criterion in enumerate(self.dataset.criteria):
             if self._min_values[i] not in criterion.value_function.characteristic_points_locations:
                 raise ValueError(f"{self._min_values[i]} is not in the characteristic points locations of "
@@ -58,17 +62,17 @@ class UTA:
                                      f"{self.dataset.criteria[i].name}")
 
     @property
-    def n_alternatives(self):
+    def n_alternatives(self) -> int:
         return len(self.dataset.data.shape[0])
 
     @property
-    def n_criteria(self):
+    def n_criteria(self) -> int:
         return len(self.dataset.data.shape[1])
 
-    def solve(self):
+    def solve(self) -> None:
         """Finds a minimal subset of constraints that need to be removed to restore consistency.
 
-        The objective function consist on minimizing the sum of the binary variables that represent the
+        The objective function consist of minimizing the sum of the binary variables that represent the
         comparisons between alternatives. We call these variables v_i. The index i is the position of the
         comparison in the list of self.comparisons. The value of the variable is 1 if the comparison
         is inconsistent and 0 otherwise.
@@ -120,7 +124,7 @@ class UTA:
         self.prob.solve(pulp.GLPK(msg=False))
 
     def get_inconsistent_comparisons(self) -> list[Comparison]:
-        """Creates the inconsistent comparisons based on the results of the inconsistency model.
+        """Creates the inconsistent comparisons based on the results of the problem.
 
         If the binary variable that represents the comparison between two alternatives is 1, then the comparison
         is inconsistent.
@@ -133,7 +137,7 @@ class UTA:
         """
         inconsistent_comparisons = []
         v_variables = [variable for (name, variable) in self._prob_variables.items()
-                       if isinstance(name, int)]
+                       if name.startswith("v_")]
         for i, variable in enumerate(v_variables):
             if variable.varValue == 1:
                 inconsistent_comparisons.append(self.comparisons[i])
@@ -226,8 +230,8 @@ class UTA:
             A dictionary with the comprehensive values of the alternatives.
         """
         comprehensive_values = {}
-        for alternative in self.dataset.alternative_names:
-            U_a = sum(self.dataset.criteria[k].value_function(self.dataset.data[alternative, k]) for k in
+        for i, alternative in enumerate(self.dataset.alternative_names):
+            U_a = sum(self.dataset.criteria[k].value_function(self.dataset.data[i, k]) for k in
                       range(len(self.dataset.criteria)))
             comprehensive_values[alternative] = U_a
         return comprehensive_values
