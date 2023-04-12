@@ -57,7 +57,7 @@ class Ranking:
 
     @staticmethod
     def from_dict(ranking: dict[str, int]) -> 'Ranking':
-        """Create a ranking from a list of preference relations.
+        """Creates a ranking from a list of preference relations.
 
         Args:
             ranking (dict): A dictionary with the position of each alternative in the ranking. The keys are the
@@ -115,12 +115,12 @@ class Ranking:
         return comparisons
 
     def remove_comparisons(self, comparisons: Sequence[Comparison]):
-        """Remove a list of comparisons."""
+        """Removes a list of comparisons."""
         for comparison in comparisons:
             self.add_incomparability(comparison.alternative_1, comparison.alternative_2)
 
     def get_preference_relations(self) -> list[tuple[str, str]]:
-        """List with the preference relations in the ranking."""
+        """Lists with the preference relations in the ranking."""
         preference_relations = []
         for i in range(self.n_alternatives):
             for j in range(self.n_alternatives):
@@ -130,7 +130,7 @@ class Ranking:
         return preference_relations
 
     def get_indifference_relations(self) -> list[tuple[str, str]]:
-        """List with the indifference relations in the ranking."""
+        """Lists with the indifference relations in the ranking."""
         indifference_relations = []
         for i in range(self.n_alternatives):
             for j in range(self.n_alternatives):
@@ -140,7 +140,7 @@ class Ranking:
         return indifference_relations
 
     def visualize(self, title: Optional[str] = None, seed: Optional[int] = None):
-        """Visualize the ranking.
+        """Visualizes the ranking.
 
         if receiving an ImportError, try to install the optional dependencies:
         https://pygraphviz.github.io/documentation/stable/install.html
@@ -204,7 +204,7 @@ class Ranking:
         plt.show()
 
     def _get_alternative_index(self, alternative: Union[int, str]) -> int:
-        """Get the index of an alternative.
+        """Gets the index of an alternative.
 
         Args:
             alternative (int or str): The alternative.

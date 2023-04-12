@@ -1,8 +1,7 @@
 import pulp
-import pytest
 import numpy as np
 
-from src.decision_analysis.decision_making import Criterion, UTA, Dataset, Ranking
+from src.decision_analysis.decision_making import Criterion, UTA, Dataset, Ranking, ValueFunction
 
 
 def test_pulp_glpk():
@@ -24,8 +23,8 @@ def test_pulp_glpk():
 def get_simple_example_dataset():
     alternatives = ["X", "Y", "Z"]
     criteria = [
-        Criterion(type=1, name="g_1"),
-        Criterion(type=1, name="g_2"),
+        Criterion(type=1, name="g_1", value_function=ValueFunction([0, 10])),
+        Criterion(type=1, name="g_2", value_function=ValueFunction([0, 10])),
     ]
     data = np.array([[10, 0],
                      [0, 10],
@@ -45,9 +44,9 @@ def get_ranking2():
     return Ranking.from_dict(ranking_dict)
 
 
-@pytest.mark.xfail
-def test_find_minimal_inconsistent_dataset_empty():
+def find_minimal_inconsistent_dataset_empty():
     dataset = get_simple_example_dataset()
     ranking = get_ranking1()
-    uta = UTA(dataset, )
-    assert uta.find_minimal_inconsistent_subset(ranking) == []
+    comparisons = ranking.get_comparisons()
+    uta = UTA(dataset, comparisons)
+    uta.solve()
