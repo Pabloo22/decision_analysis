@@ -1,6 +1,8 @@
 import pandas as pd
 
-from decision_analysis.decision_making import Criterion, Alternative
+from decision_analysis.decision_making import Alternative
+from src.decision_analysis.decision_making.data_structures import Criterion
+from src.decision_analysis.decision_making.data_structures import Dataset, Comparison, ComparisonType,ValueFunction
 
 
 def load_dataset() -> pd.DataFrame:
@@ -100,6 +102,21 @@ def load_criteria(version: int = 1) -> list[Criterion]:
                       preference_threshold=5,
                       veto_threshold=7)
         ]
+    elif version == 4:
+        criteria = [
+            Criterion(type=-1,
+                      name='Price',
+                      value_function=ValueFunction([234, 450, 864])),
+            Criterion(type=1,
+                      name='Commodity',
+                      value_function=ValueFunction([2, 4, 5])),
+            Criterion(type=-1,
+                      name='Location',
+                      value_function=ValueFunction([1, 3])),
+            Criterion(type=1,
+                      name='Rating',
+                      value_function=ValueFunction([5.7, 7.08, 8.46, 9.84]))
+        ]
     else:
         raise ValueError('Invalid version')
 
@@ -113,3 +130,12 @@ def load_profile_boundaries():
 
     boundaries = [b1, b2, b3]
     return boundaries
+
+def get_dataset(criteria_version=4) -> Dataset:
+    df = load_dataset()
+    data = df.values
+    criteria = load_criteria(criteria_version)
+    alternative_names = df.index
+    dataset = Dataset(data=data, criteria=criteria, alternative_names=alternative_names)
+
+    return dataset
