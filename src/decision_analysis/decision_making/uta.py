@@ -1,8 +1,8 @@
 import pulp
 import numpy as np
 
-from src.decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType, ValueFunction
-from src.decision_analysis.decision_making.data_structures import Criterion
+from decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType, ValueFunction
+from decision_analysis.decision_making.data_structures import Criterion
 
 
 class UTA:
@@ -118,6 +118,8 @@ class UTA:
             elif comparison.type == ComparisonType.INDIFFERENCE:
                 self.prob += U_ai - U_aj - inconsistency_vars[idx - 1] <= 0
                 self.prob += U_aj - U_ai - inconsistency_vars[idx - 1] <= 0
+            else:
+                raise ValueError(f"Comparison type {comparison.type} is not supported.")
 
         self._add_general_constraints(self.prob, self._prob_variables)
 

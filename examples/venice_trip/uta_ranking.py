@@ -3,8 +3,8 @@ import pulp
 
 
 from comparisons import get_comparisons
-from src.decision_analysis.decision_making.data_structures.dataset import Dataset
-from src.decision_analysis.decision_making.uta import UTA
+from decision_analysis.decision_making.data_structures.dataset import Dataset
+from decision_analysis.decision_making.uta import UTA
 from load_data import get_dataset
 
 
@@ -36,4 +36,7 @@ if __name__ == '__main__':
     uta.solve()
 
     UTA.print_model_results(uta.prob)
-    plot_value_functions(uta.prob)
+    # plot_value_functions(uta.prob)
+    uta.update_value_functions()
+    uta_ranking = uta.create_ranking()
+    uta_ranking.visualize("UTA Ranking", seed=42, layout='spring')
