@@ -7,6 +7,7 @@ from typing import Optional
 class Alternative:
     """A class representing an alternative in the decision analysis.
 
+    The class is used by ELECTRE TRI-B but is currently deprecated.
     Attributes:
         name (str): The name of the alternative.
         evaluations (Dict[str, float]): A dictionary containing the evaluations of the alternative on each criterion.

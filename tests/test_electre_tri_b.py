@@ -142,14 +142,18 @@ def test_calculate_class_assignments():
          [1, 1, 0.5, 0, 0],
          [1, 1, 0, 0, 0],
          [1, -1, -1, 0, 0],
-         [1, 1, 0.5, 0.5, 0]],
+         [1, 1, 0.5, 0.5, 0],
+         [1, 0.5, 0.5, 0.5, 0],
+         [1, 1, 1, 1, 0],
+         [-1, -1, -1, -1, -1],
+         ]
     )
 
     optimistic_class_assignments, pessimistic_class_assignments = \
         ElectreTriB.calculate_class_assignments(outranking_matrix)
 
-    assert np.array_equal(optimistic_class_assignments, np.array([2, 2, 4, 4, 4, 1, 3, 2, 3, 4], dtype=int))
-    assert np.array_equal(pessimistic_class_assignments, np.array([2, 1, 4, 1, 4, 1, 3, 2, 1, 4], dtype=int))
+    assert np.array_equal(optimistic_class_assignments, np.array([2, 2, 4, 4, 4, 1, 3, 2, 3, 4, 4, 4, 5], dtype=int))
+    assert np.array_equal(pessimistic_class_assignments, np.array([2, 1, 4, 1, 4, 1, 3, 2, 1, 4, 4, 4, 0], dtype=int))
 
 
 if __name__ == "__main__":
