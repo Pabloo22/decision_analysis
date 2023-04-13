@@ -139,7 +139,7 @@ class Ranking:
                 indifference_relations.append((self.alternative_names[i], self.alternative_names[j]))
         return indifference_relations
 
-    def visualize(self, title: Optional[str] = None, seed: Optional[int] = None):
+    def visualize(self, title: Optional[str] = None, seed: Optional[int] = None, layout: str = 'graphviz'):
         """Visualizes the ranking.
 
         if receiving an ImportError, try to install the optional dependencies:
@@ -148,6 +148,7 @@ class Ranking:
         Args:
             title (str): Title of the plot.
             seed (int): Seed for the random number generator.
+            layout (str): Method to use for the visualization. Can be 'dot' or 'spring'.
         """
         graph = nx.DiGraph()
 
@@ -177,16 +178,21 @@ class Ranking:
         if seed is not None:
             np.random.seed(seed)
 
-        try:
-            pos = nx.drawing.nx_agraph.graphviz_layout(graph, prog='dot')
-        except ImportError:
-            warnings.warn('pygraphviz is not installed. Using spring layout instead. To install pygraphviz, '
-                          'follow the instructions in https://pygraphviz.github.io/documentation/stable/install.html')
+        if layout == 'graphviz':
+            try:
+                pos = nx.drawing.nx_agraph.graphviz_layout(graph, prog='dot')
+            except ImportError:
+                warnings.warn('pygraphviz is not installed. Using spring layout instead. To install pygraphviz, '
+                              'follow the instructions in https://pygraphviz.github.io/documentation/stable/install.html')
+                pos = nx.spring_layout(graph, seed=seed)
+        elif layout == 'spring':
             pos = nx.spring_layout(graph, seed=seed)
+        else:
+            raise ValueError(f'Unknown method {layout}')
 
         # Draw nodes and labels
-        nx.draw_networkx_nodes(graph, pos, node_color='skyblue', node_size=2000)
-        nx.draw_networkx_labels(graph, pos, font_size=12, font_weight='bold')
+        nx.draw_networkx_nodes(graph, pos, node_color='skyblue', node_size=500)
+        nx.draw_networkx_labels(graph, pos, font_size=8, font_weight='bold')
 
         # Draw preference edges
         preference_edges = [(u, v) for (u, v, d) in graph.edges(data=True) if d['type'] == 'preference']
