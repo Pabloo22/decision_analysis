@@ -77,7 +77,7 @@ class UTA:
         comparison in the list of self.comparisons. The value of the variable is 1 if the comparison
         is inconsistent and 0 otherwise.
 
-        The specific constraints of this model can be represented as follows:
+        The specific constraints of this problem can be represented as follows:
         U(a_1) > U(a_2) - v_1 if a_1 is preferred to a_2 by the decision maker. This is represented by:
         U(a_1) >= U(a_2) - v_1 + epsilon
         U(a_2) - U(a_1) - v_1 <= -epsilon
@@ -131,9 +131,6 @@ class UTA:
         If the binary variable that represents the comparison between two alternatives is 1, then the comparison
         is inconsistent.
 
-        This is an auxiliary function for the method find_minimal_inconsistent_subset that is
-        called after solving the inconsistency model.
-
         Returns:
             A list of Comparison objects that need to be removed to restore consistency.
         """
@@ -147,7 +144,7 @@ class UTA:
         return inconsistent_comparisons
 
     def update_value_functions(self) -> None:
-        """Updates the value functions of the dataset based on the results of the model.
+        """Updates the value functions of the dataset based on the results of the problem.
 
         The value functions are the values of the objective function for each alternative.
         """
@@ -161,7 +158,7 @@ class UTA:
                                           variables: dict[str, pulp.LpVariable]) -> pulp.LpVariable:
         """Creates the comprehensive value equation.
 
-        The comprehensive value equation is the objective function of the model. It is the sum of the
+        The comprehensive value equation is the objective function of the problem. It is the sum of the
         value functions of all the criteria.
 
         Args:
@@ -180,7 +177,7 @@ class UTA:
         return pulp.lpSum(affine_expressions)
 
     def _add_general_constraints(self, prob: pulp.LpProblem, variables: dict[str, pulp.LpVariable]) -> None:
-        """Adds the general constraints to the model.
+        """Adds the general constraints to the problem.
 
         The general constraints are the ones that are common to both ordinal regression problems:
             * Normalization constraint:
@@ -192,8 +189,6 @@ class UTA:
             * Non-negativity constraint: All variables must be non-negative.
 
         This constraints will be used to find the value functions and the minimal inconsistent subset.
-
-        Note that this method must be called after adding the value function into the model.
 
         Args:
             prob: The problem in which the constraints are added.
@@ -259,8 +254,8 @@ class UTA:
         return Ranking.from_dict(ranking_dict)
 
     @staticmethod
-    def print_model_results(prob) -> None:
-        """Prints the results of the value functions model.
+    def print_problem_results(prob) -> None:
+        """Prints the results of the problem.
 
         The results are the value functions of the criteria.
         """
@@ -308,7 +303,7 @@ if __name__ == "__main__":
 
     uta = UTA(dataset, comparisons)
     uta.solve()
-    UTA.print_model_results(uta.prob)
+    UTA.print_problem_results(uta.prob)
 
     # --------------------------------------
 
@@ -342,7 +337,7 @@ if __name__ == "__main__":
         comparisons = ranking.get_comparisons()
         uta = UTA(dataset, comparisons)
         uta.solve()
-        UTA.print_model_results(uta.prob)
+        UTA.print_problem_results(uta.prob)
 
     print("\nSimple example")
     print("---")

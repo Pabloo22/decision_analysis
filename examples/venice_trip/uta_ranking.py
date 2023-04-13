@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     uta.solve()
 
-    UTA.print_model_results(uta.prob)
+    UTA.print_problem_results(uta.prob)
     # plot_value_functions(uta.prob)
     uta.update_value_functions()
     uta_ranking = uta.create_ranking()
