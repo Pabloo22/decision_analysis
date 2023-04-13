@@ -25,24 +25,48 @@ def find_comparisons(price_difference: float = 25):
                 continue
 
 
+def get_high_price_diff_same_location_comparisons(price_difference: float = 100, verbose: bool = False):
+    """In this case we check for the same location, but with a higher price."""
+    dataset = load_dataset()
+    comparisons = []
+    for i, (alt_i, row) in enumerate(dataset.iterrows()):
+        for j, (alt_j, row2) in enumerate(dataset.iterrows()):
+            if alt_i >= alt_j:
+                continue
+            big_price_difference = abs(row['Price'] - row2['Price']) > price_difference
+            same_location = row['Location'] == row2['Location']
+            if big_price_difference and same_location:
+                if verbose:
+                    print(f"${alt_i}$ is preferred over ${alt_j}$", end=', ')
+                comparisons.append(Comparison(i, j, ComparisonType.PREFERENCE))
+                continue
+
+
 def get_comparisons():
     comparisons = [
-        Comparison(4, 0, ComparisonType.PREFERENCE),  # Initial pairwise comparison
-        Comparison(4, 1, ComparisonType.PREFERENCE),  # Initial pairwise comparison
-        Comparison(4, 2, ComparisonType.PREFERENCE),  # Initial pairwise comparison
-        Comparison(4, 3, ComparisonType.PREFERENCE),  # Initial pairwise comparison
-        Comparison(0, 3, ComparisonType.PREFERENCE),  # Proximity to Venice and low price difference
-        Comparison(1, 3, ComparisonType.PREFERENCE),  # Proximity to Venice and low price difference
-        Comparison(4, 7, ComparisonType.PREFERENCE),  # Proximity to Venice and low price difference
-        Comparison(10, 8, ComparisonType.PREFERENCE),  # Proximity to Venice and low price difference
-        Comparison(0, 1, ComparisonType.PREFERENCE),  # Commodity, low price difference, same location
-        Comparison(0, 6, ComparisonType.PREFERENCE),  # Least favorable option
-        Comparison(1, 6, ComparisonType.PREFERENCE),  # Least favorable option
-        Comparison(2, 6, ComparisonType.PREFERENCE),  # Least favorable option
-        Comparison(3, 6, ComparisonType.PREFERENCE),  # Least favorable option
-        Comparison(4, 6, ComparisonType.PREFERENCE),  # Least favorable option
-        Comparison(5, 4, ComparisonType.PREFERENCE)  # Check inconsistency detection
+        Comparison(4, 0, ComparisonType.PREFERENCE),
+        Comparison(4, 1, ComparisonType.PREFERENCE),
+        Comparison(4, 2, ComparisonType.PREFERENCE),
+        Comparison(4, 3, ComparisonType.PREFERENCE),
+        Comparison(0, 3, ComparisonType.PREFERENCE),
+        Comparison(1, 3, ComparisonType.PREFERENCE),
+        Comparison(4, 7, ComparisonType.PREFERENCE),
+        Comparison(10, 8, ComparisonType.PREFERENCE),
+        Comparison(0, 1, ComparisonType.PREFERENCE),
+        Comparison(0, 6, ComparisonType.PREFERENCE),
+        Comparison(1, 6, ComparisonType.PREFERENCE),
+        Comparison(2, 6, ComparisonType.PREFERENCE),
+        Comparison(3, 6, ComparisonType.PREFERENCE),
+        Comparison(4, 6, ComparisonType.PREFERENCE),
+        Comparison(5, 6, ComparisonType.PREFERENCE),
+        Comparison(7, 6, ComparisonType.PREFERENCE),
+        Comparison(8, 6, ComparisonType.PREFERENCE),
+        Comparison(9, 6, ComparisonType.PREFERENCE),
+        Comparison(10, 6, ComparisonType.PREFERENCE),
+        Comparison(11, 6, ComparisonType.PREFERENCE),
+        Comparison(5, 4, ComparisonType.PREFERENCE)
     ]
+
     return comparisons
 
 
@@ -83,4 +107,4 @@ def check_inconsistency_detection() -> list:
 
 
 if __name__ == '__main__':
-    find_comparisons()
+    get_high_price_diff_same_location_comparisons(verbose=True)
