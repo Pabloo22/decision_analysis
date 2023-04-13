@@ -16,6 +16,7 @@ class Criterion:
         preference_threshold (float): Preference threshold for the criterion. Optional.
         indifference_threshold (float): Indifference threshold for the criterion. Optional.
         veto_threshold (float): Veto threshold for the criterion. Optional.
+        value_function (ValueFunction): Value function for the criterion. Optional.
     """
     type: Union[int, str]
     weight: float = 1.
