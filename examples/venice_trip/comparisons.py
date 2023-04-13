@@ -31,7 +31,7 @@ def get_high_price_diff_same_location_comparisons(price_difference: float = 100,
     comparisons = []
     for i, (alt_i, row) in enumerate(dataset.iterrows()):
         for j, (alt_j, row2) in enumerate(dataset.iterrows()):
-            if alt_i == alt_j:
+            if alt_i == alt_j or (i == 4 and j == 5):  # We don't want to compare a_5 and a_6 again
                 continue
             big_price_difference = row2['Price'] - row['Price'] > price_difference
             same_location = row['Location'] == row2['Location']
@@ -39,6 +39,8 @@ def get_high_price_diff_same_location_comparisons(price_difference: float = 100,
                 if verbose:
                     print(f"${alt_i}$ is preferred over ${alt_j}$", end=', ')
                 comparisons.append(Comparison(i, j, ComparisonType.PREFERENCE))
+
+    return comparisons
 
 
 def get_comparisons():
