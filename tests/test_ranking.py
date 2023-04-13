@@ -25,11 +25,23 @@ def ranking3():
     return Ranking(matrix=matrix, alternatives=['E', 'B', 'I'])
 
 
+def ranking4():
+    ranking = Ranking(alternatives=['a', 'b', 'c', 'd'])
+    ranking.add_preference('a', 'b')
+    ranking.add_preference('a', 'c')
+    ranking.add_preference('a', 'd')
+    ranking.add_indifference('b', 'c')
+    ranking.add_preference('c', 'd')
+    ranking.add_preference('b', 'd')
+    return ranking
+
+
 @pytest.mark.parametrize("ranking_dict, expected", [
     ({"E": 1, "B": 2, "I": 3}, ranking1()),
     ({"E": 1, "B": 2, "I": 2}, ranking2()),
     ({"E": 1, "B": 3, "I": 3}, ranking2()),
     ({"E": 3, "B": 2, "I": 1}, ranking3()),
+    ({"a": 1, "b": 2, "c": 2, "d": 3}, ranking4()),
 ])
 def test_from_dict(ranking_dict, expected):
     assert np.allclose(Ranking.from_dict(ranking_dict).matrix, expected.matrix)
