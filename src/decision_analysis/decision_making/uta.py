@@ -1,8 +1,7 @@
 import pulp
 import numpy as np
 
-from decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType, ValueFunction
-from decision_analysis.decision_making.data_structures import Criterion
+from decision_analysis.decision_making import Dataset, Ranking, Comparison, ComparisonType, ValueFunction, Criterion
 
 
 class UTA:
@@ -17,7 +16,7 @@ class UTA:
 
     This class also implements the method to find the minimal inconsistent subset of comparisons.
 
-    Attributes:
+    Args:
         dataset: The dataset that we want to analyze.
         comparisons: The comparisons made by the decision maker.
     """
