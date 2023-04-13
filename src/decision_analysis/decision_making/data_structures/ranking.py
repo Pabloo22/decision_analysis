@@ -17,6 +17,14 @@ class Comparison(NamedTuple):
     alternative_2: int
     type: ComparisonType
 
+    def __eq__(self, other):
+        return self.alternative_1 == other.alternative_1 and \
+               self.alternative_2 == other.alternative_2 and \
+               self.type == other.type
+
+    def __hash__(self):
+        return hash((self.alternative_1, self.alternative_2, self.type))
+
 
 class Ranking:
     """A class representing a ranking of alternatives.
