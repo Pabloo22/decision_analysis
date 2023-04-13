@@ -16,7 +16,7 @@ class UTA:
 
     This class also implements the method to find the minimal inconsistent subset of comparisons.
 
-    Attributes:
+    Args:
         dataset: The dataset that we want to analyze.
         comparisons: The comparisons made by the decision maker.
     """
