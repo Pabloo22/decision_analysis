@@ -46,11 +46,16 @@ class ValueFunction:
         """Checks if the value function is monotonic."""
 
         ascending = characteristic_points_values[0] < characteristic_points_values[1]
+        descending = characteristic_points_values[0] > characteristic_points_values[1]
         for i in range(1, len(characteristic_points_values) - 1):
             if ascending and characteristic_points_values[i] > characteristic_points_values[i + 1]:
                 return False
-            if not ascending and characteristic_points_values[i] < characteristic_points_values[i + 1]:
+            if descending and characteristic_points_values[i] < characteristic_points_values[i + 1]:
                 return False
+
+            if not ascending and not descending:
+                ascending = characteristic_points_values[i] < characteristic_points_values[i + 1]
+                descending = characteristic_points_values[i] > characteristic_points_values[i + 1]
 
         return True
 
