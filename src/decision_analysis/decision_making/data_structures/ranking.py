@@ -183,7 +183,8 @@ class Ranking:
                 pos = nx.drawing.nx_agraph.graphviz_layout(graph, prog='dot')
             except ImportError:
                 warnings.warn('pygraphviz is not installed. Using spring layout instead. To install pygraphviz, '
-                              'follow the instructions in https://pygraphviz.github.io/documentation/stable/install.html')
+                              'follow the instructions in '
+                              'https://pygraphviz.github.io/documentation/stable/install.html')
                 pos = nx.spring_layout(graph, seed=seed)
         elif layout == 'spring':
             pos = nx.spring_layout(graph, seed=seed)
@@ -191,8 +192,8 @@ class Ranking:
             raise ValueError(f'Unknown method {layout}')
 
         # Draw nodes and labels
-        nx.draw_networkx_nodes(graph, pos, node_color='skyblue', node_size=500)
-        nx.draw_networkx_labels(graph, pos, font_size=8, font_weight='bold')
+        nx.draw_networkx_nodes(graph, pos, node_color='skyblue', node_size=1000, alpha=0.5)
+        nx.draw_networkx_labels(graph, pos, font_size=12, font_weight='bold')
 
         # Draw preference edges
         preference_edges = [(u, v) for (u, v, d) in graph.edges(data=True) if d['type'] == 'preference']
