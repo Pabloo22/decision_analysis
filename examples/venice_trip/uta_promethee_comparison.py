@@ -11,7 +11,7 @@ if __name__ == '__main__':
     alternative_dict = {alternative: i for i, alternative in enumerate(dataset.alternative_names)}
     comparisons = get_all_comparisons()
 
-    uta = UTA(dataset=dataset, comparisons=comparisons)
+    uta = UTA(dataset=dataset, comparisons=comparisons, epsilon=0.01)
     uta.solve()
     uta.update_value_functions()
     uta_ranking = uta.create_ranking()
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     promethee = Promethee(matrix, criteria, alternatives)
     promethee.run()
     promethee_ii_graph = promethee.get_ranking_graph('II')
-    promethee_ii_ranking = Ranking(nx.to_numpy_array(promethee_ii_graph), alternatives)
+    promethee_ii_ranking = Ranking.from_dict(dict(zip(nx.to_dict_of_lists(promethee_ii_graph).keys(), range(1, len(alternatives) + 1))))
 
     uta_ranking.visualize("UTA Ranking", seed=42, layout='spring')
     promethee_ii_ranking.visualize("Promethee II Ranking", seed=42, layout='spring')

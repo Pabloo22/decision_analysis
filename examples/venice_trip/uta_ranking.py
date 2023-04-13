@@ -34,7 +34,7 @@ def main():
     uta.solve()
 
     UTA.print_problem_results(uta.prob)
-    # plot_value_functions(uta.prob)
+    plot_value_functions(uta.prob)
     uta.update_value_functions()
     print(uta.get_comprehensive_values())
     uta_ranking = uta.create_ranking()
