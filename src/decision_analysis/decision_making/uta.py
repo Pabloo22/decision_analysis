@@ -21,22 +21,18 @@ class UTA:
         comparisons: The comparisons made by the decision maker.
     """
 
-    def __init__(self, dataset: Dataset, comparisons: list[Comparison]):
+    def __init__(self, dataset: Dataset, comparisons: list[Comparison], epsilon: float = 1e-6):
         self.dataset = dataset
 
         self.prob = pulp.LpProblem("LinearProblem", pulp.LpMinimize)
 
         self.comparisons = comparisons
 
-        self._epsilon = 1e-4
+        self._epsilon = epsilon
         self._prob_variables = {}
 
-        self._min_values = []
-        self._max_values = []
-
-        for i, criterion in enumerate(self.dataset.criteria):
-            self._min_values.append(self.dataset.data[:, i].min())
-            self._max_values.append(self.dataset.data[:, i].max())
+        self._min_values = [self.dataset.data[:, i].min() for i in range(self.dataset.data.shape[1])]
+        self._max_values = [self.dataset.data[:, i].max() for i in range(self.dataset.data.shape[1])]
 
         self._check_value_function_locations()
 
@@ -241,14 +237,13 @@ class UTA:
         comprehensive_values = self.get_comprehensive_values()
         sorted_comprehensive_values = sorted(comprehensive_values.items(), key=lambda x: x[1], reverse=True)
         ranking_dict = {}
-        rank = 1
         last_value = -1
+        rank = 0
         for alternative, value in sorted_comprehensive_values:
+            if abs(last_value - value) > self._epsilon:
+                rank += 1
+                last_value = value
             ranking_dict[alternative] = rank
-            if value == last_value:
-                continue
-            rank += 1
-            last_value = value
 
         return Ranking.from_dict(ranking_dict)
 
