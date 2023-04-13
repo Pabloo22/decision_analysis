@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pulp
 
 
-from comparisons import get_comparisons
+from comparisons import get_all_comparisons
 from decision_analysis.decision_making.uta import UTA
 from load_data import get_dataset
 
@@ -27,9 +27,9 @@ def plot_value_functions(prob: pulp.LpProblem):
 
 def main():
     dataset = get_dataset()
-    comparisons = get_comparisons()
-
-    uta = UTA(dataset=dataset, comparisons=comparisons)
+    comparisons = get_all_comparisons()
+    print(comparisons)
+    uta = UTA(dataset=dataset, comparisons=comparisons, epsilon=0.01)
 
     uta.solve()
 
