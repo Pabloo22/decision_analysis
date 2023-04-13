@@ -25,10 +25,8 @@ def plot_value_functions(prob: pulp.LpProblem):
         plt.show()
 
 
-if __name__ == '__main__':
+def main():
     dataset = get_dataset()
-
-    alternative_dict = {alternative: i for i, alternative in enumerate(dataset.alternative_names)}
     comparisons = get_comparisons()
 
     uta = UTA(dataset=dataset, comparisons=comparisons)
@@ -36,7 +34,12 @@ if __name__ == '__main__':
     uta.solve()
 
     UTA.print_problem_results(uta.prob)
-    plot_value_functions(uta.prob)
+    # plot_value_functions(uta.prob)
     uta.update_value_functions()
+    print(uta.get_comprehensive_values())
     uta_ranking = uta.create_ranking()
     uta_ranking.visualize("UTA Ranking", seed=42, layout='spring')
+
+
+if __name__ == '__main__':
+    main()
