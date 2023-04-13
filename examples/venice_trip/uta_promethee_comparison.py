@@ -2,19 +2,20 @@ from decision_analysis.decision_making.uta import UTA
 from decision_analysis.decision_making.promethee import Promethee
 from decision_analysis.decision_making import Ranking
 from load_data import get_dataset, load_criteria
-from comparisons import get_comparisons
+from comparisons import get_all_comparisons
 
 import networkx as nx
 
 if __name__ == '__main__':
     dataset = get_dataset()
     alternative_dict = {alternative: i for i, alternative in enumerate(dataset.alternative_names)}
-    comparisons = get_comparisons()
+    comparisons = get_all_comparisons()
 
     uta = UTA(dataset=dataset, comparisons=comparisons)
     uta.solve()
     uta.update_value_functions()
     uta_ranking = uta.create_ranking()
+    UTA.print_problem_results(uta.prob)
 
     matrix = dataset.data
     alternatives = dataset.alternative_names

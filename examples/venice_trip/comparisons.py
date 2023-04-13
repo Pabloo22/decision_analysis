@@ -107,5 +107,13 @@ def check_inconsistency_detection() -> list:
     return comparisons
 
 
+def get_all_comparisons():
+    comparisons = get_comparisons()
+    other_comparisons = get_high_price_diff_same_location_comparisons()
+    not_in_comparisons = [c for c in other_comparisons if c not in comparisons]
+    comparisons.extend(not_in_comparisons)
+    return comparisons
+
+
 if __name__ == '__main__':
     get_high_price_diff_same_location_comparisons(verbose=True)
