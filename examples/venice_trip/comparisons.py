@@ -31,15 +31,14 @@ def get_high_price_diff_same_location_comparisons(price_difference: float = 100,
     comparisons = []
     for i, (alt_i, row) in enumerate(dataset.iterrows()):
         for j, (alt_j, row2) in enumerate(dataset.iterrows()):
-            if alt_i >= alt_j:
+            if alt_i == alt_j:
                 continue
-            big_price_difference = abs(row['Price'] - row2['Price']) > price_difference
+            big_price_difference = row2['Price'] - row['Price'] > price_difference
             same_location = row['Location'] == row2['Location']
             if big_price_difference and same_location:
                 if verbose:
                     print(f"${alt_i}$ is preferred over ${alt_j}$", end=', ')
                 comparisons.append(Comparison(i, j, ComparisonType.PREFERENCE))
-                continue
 
 
 def get_comparisons():
